@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import { useTranslations, useLocale } from "next-intl";
 
 type CommitmentLevel = "gentle" | "steady" | "focused";
 
@@ -14,15 +15,17 @@ type Habit = {
   week_count: number;
 };
 
-const COMMITMENT_CONFIG: Record<CommitmentLevel, { label: string; icon: string; description: string }> = {
-  gentle:  { label: "Gentle",  icon: "🌿", description: "No pressure, just showing up" },
-  steady:  { label: "Steady",  icon: "⚡", description: "Building momentum" },
-  focused: { label: "Focused", icon: "🎯", description: "Staying accountable" },
+const COMMITMENT_ICONS: Record<CommitmentLevel, string> = {
+  gentle: "🌿",
+  steady: "⚡",
+  focused: "🎯",
 };
 
 // ─── Weekly progress ring ─────────────────────────────────────────────────────
 
 function WeeklyRing({ habits }: { habits: Habit[] }) {
+  const t = useTranslations("habits.weekRing");
+
   if (habits.length === 0) return null;
 
   const totalTarget = habits.reduce((s, h) => s + h.target_per_week, 0);
@@ -35,20 +38,17 @@ function WeeklyRing({ habits }: { habits: Habit[] }) {
   const offset = circumference - progress * circumference;
 
   const label =
-    pct === 0 ? "Let's go" :
-    pct < 33  ? "Getting started" :
-    pct < 66  ? "Building momentum" :
-    pct < 100 ? "Almost there" :
-    "Week complete ✨";
+    pct === 0 ? t("letsGo") :
+    pct < 33  ? t("gettingStarted") :
+    pct < 66  ? t("buildingMomentum") :
+    pct < 100 ? t("almostThere") :
+    t("weekComplete");
 
   return (
     <div className="flex items-center gap-6 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
-      {/* Ring */}
       <div className="relative flex-shrink-0">
         <svg width="96" height="96" viewBox="0 0 96 96">
-          {/* Track */}
           <circle cx="48" cy="48" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="8" />
-          {/* Progress */}
           <circle
             cx="48" cy="48" r={radius}
             fill="none"
@@ -66,9 +66,8 @@ function WeeklyRing({ habits }: { habits: Habit[] }) {
         </div>
       </div>
 
-      {/* Text */}
       <div>
-        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">This week</p>
+        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">{t("label")}</p>
         <p className="text-2xl font-light text-[#3E4A3D]">{totalDone}<span className="text-slate-400 text-base"> / {totalTarget}</span></p>
         <p className="text-sm text-slate-500 mt-1">{label}</p>
       </div>
@@ -76,17 +75,14 @@ function WeeklyRing({ habits }: { habits: Habit[] }) {
   );
 }
 
-// ─── Week progress bar (per habit) ───────────────────────────────────────────
+// ─── Week progress dots (per habit) ──────────────────────────────────────────
 
 function WeekProgress({ count, target }: { count: number; target: number }) {
   const dots = Array.from({ length: target }, (_, i) => i < count);
   return (
     <div className="flex gap-1 items-center">
       {dots.map((done, i) => (
-        <div
-          key={i}
-          className={`w-2 h-2 rounded-full transition ${done ? "bg-[#7C9082]" : "bg-slate-200"}`}
-        />
+        <div key={i} className={`w-2 h-2 rounded-full transition ${done ? "bg-[#7C9082]" : "bg-slate-200"}`} />
       ))}
       <span className="text-[10px] text-slate-400 ml-1">{count}/{target}×</span>
     </div>
@@ -97,12 +93,6 @@ function WeekProgress({ count, target }: { count: number; target: number }) {
 
 type HonorState = { date: string; label: string; wasCompleted: boolean } | null;
 
-function formatDayLabel(dateStr: string): string {
-  return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", {
-    weekday: "long", month: "short", day: "numeric",
-  });
-}
-
 function getWeekStart(): string {
   const now = new Date();
   const day = now.getDay();
@@ -112,10 +102,12 @@ function getWeekStart(): string {
   return mon.toISOString().split("T")[0];
 }
 
-function HabitCalendar({ habitId, onWeekCountChange }: {
+function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
   habitId: string;
   onWeekCountChange: (delta: number) => void;
+  localeTag: string;
 }) {
+  const t = useTranslations("habits");
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -138,6 +130,12 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
   const todayStr = now.toISOString().split("T")[0];
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
 
+  function formatDayLabel(dateStr: string): string {
+    return new Date(dateStr + "T12:00:00").toLocaleDateString(localeTag, {
+      weekday: "long", month: "short", day: "numeric",
+    });
+  }
+
   function prevMonth() {
     if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1);
   }
@@ -147,13 +145,8 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
   }
 
   function handleDayClick(dateStr: string) {
-    if (dateStr > todayStr) return; // no future dates
-    if (dateStr === todayStr) {
-      // Today: toggle directly, no confirmation
-      toggleDate(dateStr);
-      return;
-    }
-    // Past day: show honor system confirmation
+    if (dateStr > todayStr) return;
+    if (dateStr === todayStr) { toggleDate(dateStr); return; }
     setHonor({ date: dateStr, label: formatDayLabel(dateStr), wasCompleted: completedDates.has(dateStr) });
   }
 
@@ -172,8 +165,6 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
         if (next.has(dateStr)) next.delete(dateStr); else next.add(dateStr);
         return next;
       });
-      // Propagate to parent if the toggled date falls in the current week
-      const todayStr = now.toISOString().split("T")[0];
       const weekStart = getWeekStart();
       if (dateStr >= weekStart && dateStr <= todayStr) {
         onWeekCountChange(wasCompleted ? -1 : 1);
@@ -184,21 +175,19 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
 
   return (
     <div className="pt-3 pb-1 space-y-3">
-      {/* Month nav */}
       <div className="flex items-center justify-between">
         <button onClick={prevMonth} className="text-slate-400 hover:text-slate-600 text-sm px-1">‹</button>
         <span className="text-xs text-slate-500 font-medium">{MONTHS[month - 1]} {year}</span>
         <button onClick={nextMonth} disabled={isCurrentMonth} className="text-slate-400 hover:text-slate-600 text-sm px-1 disabled:opacity-30">›</button>
       </div>
 
-      {/* Honor system prompt */}
       {honor && (
         <div className="bg-[#f5f8f5] border border-[#c8d5c9] rounded-xl px-4 py-3 space-y-2">
           <p className="text-xs text-[#3E4A3D] font-medium">{honor.label}</p>
           <p className="text-xs text-slate-500 leading-relaxed">
             {honor.wasCompleted
-              ? "Unmarking this day — just want to make sure. Did something change? 🌿"
-              : "Did you actually do this? This is your space — no judgment, just honesty. 🌿"}
+              ? t("honorSystem.confirmRemove")
+              : t("honorSystem.confirmAdd")}
           </p>
           <div className="flex gap-2 pt-1">
             <button
@@ -206,22 +195,21 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
               disabled={toggling}
               className="flex-1 bg-[#7C9082] text-white py-1.5 rounded-lg text-xs hover:bg-[#6A7C70] disabled:opacity-50 transition"
             >
-              {honor.wasCompleted ? "Yes, remove it" : "Yes, I did it"}
+              {honor.wasCompleted ? t("honorSystem.yesRemove") : t("honorSystem.yesAdd")}
             </button>
             <button
               onClick={() => setHonor(null)}
               className="flex-1 border border-slate-200 text-slate-500 py-1.5 rounded-lg text-xs hover:border-slate-300 transition"
             >
-              {honor.wasCompleted ? "Keep it" : "Never mind"}
+              {honor.wasCompleted ? t("honorSystem.keep") : t("honorSystem.neverMind")}
             </button>
           </div>
         </div>
       )}
 
-      {/* Grid */}
       {loading ? (
         <div className="h-24 flex items-center justify-center">
-          <span className="text-xs text-slate-300">Loading…</span>
+          <span className="text-xs text-slate-300">{t("calendarLoading")}</span>
         </div>
       ) : (
         <div className="grid grid-cols-7 gap-y-1">
@@ -258,7 +246,7 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
         </div>
       )}
 
-      <p className="text-[10px] text-slate-300 text-center">Tap a past day to log retroactively</p>
+      <p className="text-[10px] text-slate-300 text-center">{t("calendarHint")}</p>
     </div>
   );
 }
@@ -268,6 +256,9 @@ function HabitCalendar({ habitId, onWeekCountChange }: {
 function CommitmentSelector({ habitId, current, onChange }: {
   habitId: string; current: CommitmentLevel; onChange: (l: CommitmentLevel) => void;
 }) {
+  const t = useTranslations("habits.commitment");
+  const levels: CommitmentLevel[] = ["gentle", "steady", "focused"];
+
   async function select(level: CommitmentLevel) {
     onChange(level);
     await fetch(`/api/habits/${habitId}`, {
@@ -276,16 +267,17 @@ function CommitmentSelector({ habitId, current, onChange }: {
       body: JSON.stringify({ commitment_level: level }),
     });
   }
+
   return (
     <div className="pt-3 border-t border-slate-100">
-      <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Commitment style</p>
+      <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">{t("label")}</p>
       <div className="flex gap-2">
-        {(Object.entries(COMMITMENT_CONFIG) as [CommitmentLevel, typeof COMMITMENT_CONFIG[CommitmentLevel]][]).map(([level, { label, icon }]) => (
-          <button key={level} onClick={() => select(level)} title={COMMITMENT_CONFIG[level].description}
+        {levels.map((level) => (
+          <button key={level} onClick={() => select(level)} title={t(`${level}.description`)}
             className={`flex-1 py-1.5 rounded-lg text-xs border transition ${
               current === level ? "bg-[#7C9082] text-white border-[#7C9082]" : "border-slate-200 text-slate-500 hover:border-[#7C9082]"
             }`}
-          >{icon} {label}</button>
+          >{COMMITMENT_ICONS[level]} {t(`${level}.label`)}</button>
         ))}
       </div>
     </div>
@@ -295,6 +287,7 @@ function CommitmentSelector({ habitId, current, onChange }: {
 // ─── Streak badge (lazy-loaded on expand) ────────────────────────────────────
 
 function StreakBadge({ habitId }: { habitId: string }) {
+  const t = useTranslations("habits");
   const [weeks, setWeeks] = useState<number | null>(null);
 
   useEffect(() => {
@@ -307,21 +300,22 @@ function StreakBadge({ habitId }: { habitId: string }) {
 
   return (
     <div className="flex items-center gap-1.5 text-xs text-[#7C9082]">
-      <span>🔥</span>
-      <span>{weeks} week{weeks !== 1 ? "s" : ""} in a row</span>
+      <span>{t("streakBadge", { weeks })}</span>
     </div>
   );
 }
 
 // ─── Habit row ────────────────────────────────────────────────────────────────
 
-function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountChange }: {
+function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountChange, localeTag }: {
   habit: Habit;
   onToggle: (h: Habit) => void;
   onDelete: (id: string) => void;
   onCommitmentChange: (id: string, level: CommitmentLevel) => void;
   onWeekCountChange: (id: string, delta: number) => void;
+  localeTag: string;
 }) {
+  const t = useTranslations("habits");
   const [expanded, setExpanded] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
@@ -332,15 +326,13 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
     <div className={`rounded-xl border shadow-sm transition ${
       isFocused && !weekDone && !habit.completed ? "border-amber-200 bg-amber-50/40" : "border-slate-100 bg-white"
     }`}>
-      {/* Main row */}
       <div className="flex items-center gap-3 px-4 py-3 group">
-        {/* Today checkbox */}
         <button
           onClick={() => onToggle(habit)}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition ${
             habit.completed ? "bg-[#7C9082] border-[#7C9082]" : "border-slate-300 hover:border-[#7C9082]"
           }`}
-          aria-label={habit.completed ? "Mark incomplete" : "Mark complete"}
+          aria-label={habit.completed ? t("ariaIncomplete") : t("ariaComplete")}
         >
           {habit.completed && (
             <svg viewBox="0 0 10 10" className="w-full h-full p-0.5" fill="none">
@@ -349,7 +341,6 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
           )}
         </button>
 
-        {/* Name + week progress */}
         <div className="flex-1 min-w-0">
           <p className={`text-sm ${habit.completed ? "text-slate-400 line-through" : "text-[#3E4A3D]"}`}>
             {habit.name}
@@ -359,19 +350,16 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
           </div>
         </div>
 
-        {/* Commitment icon */}
-        <span className="text-sm opacity-50">{COMMITMENT_CONFIG[habit.commitment_level].icon}</span>
+        <span className="text-sm opacity-50">{COMMITMENT_ICONS[habit.commitment_level]}</span>
 
-        {/* Expand */}
         <button onClick={() => setExpanded(e => !e)} className="text-slate-300 hover:text-slate-500 text-xs transition">
           {expanded ? "▴" : "▾"}
         </button>
 
-        {/* Delete */}
         {showDelete ? (
           <div className="flex gap-2 items-center">
-            <button onClick={() => onDelete(habit.id)} className="text-xs text-red-400 hover:text-red-600 transition">Yes</button>
-            <button onClick={() => setShowDelete(false)} className="text-xs text-slate-400 hover:text-slate-600 transition">No</button>
+            <button onClick={() => onDelete(habit.id)} className="text-xs text-red-400 hover:text-red-600 transition">{t("deleteConfirm.yes")}</button>
+            <button onClick={() => setShowDelete(false)} className="text-xs text-slate-400 hover:text-slate-600 transition">{t("deleteConfirm.no")}</button>
           </div>
         ) : (
           <button onClick={() => setShowDelete(true)}
@@ -380,11 +368,10 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
         )}
       </div>
 
-      {/* Expanded panel */}
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-slate-100">
           <StreakBadge habitId={habit.id} />
-          <HabitCalendar habitId={habit.id} onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)} />
+          <HabitCalendar habitId={habit.id} onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)} localeTag={localeTag} />
           <CommitmentSelector habitId={habit.id} current={habit.commitment_level} onChange={(l) => onCommitmentChange(habit.id, l)} />
         </div>
       )}
@@ -395,9 +382,10 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
 // ─── Target per week picker ───────────────────────────────────────────────────
 
 function TargetPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const t = useTranslations("habits.targetPicker");
   return (
     <div>
-      <p className="text-xs text-slate-500 mb-2">Times per week</p>
+      <p className="text-xs text-slate-500 mb-2">{t("label")}</p>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5, 6, 7].map((n) => (
           <button
@@ -411,7 +399,7 @@ function TargetPicker({ value, onChange }: { value: number; onChange: (n: number
         ))}
       </div>
       <p className="text-[10px] text-slate-400 mt-1 text-center">
-        {value === 7 ? "Every day" : value === 1 ? "Once a week" : `${value}× a week`}
+        {value === 7 ? t("everyDay") : value === 1 ? t("onceAWeek") : t("xTimesAWeek", { count: value })}
       </p>
     </div>
   );
@@ -420,6 +408,10 @@ function TargetPicker({ value, onChange }: { value: number; onChange: (n: number
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HabitsPage() {
+  const t = useTranslations("habits");
+  const locale = useLocale();
+  const localeTag = locale === "es" ? "es-MX" : "en-US";
+
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -483,18 +475,15 @@ export default function HabitsPage() {
       <main className="flex flex-col items-center px-4 py-12 flex-1">
         <div className="w-full max-w-2xl space-y-6">
 
-          {/* Header */}
           <div>
-            <h1 className="text-3xl font-light tracking-tight">Your Habits</h1>
+            <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
             <p className="mt-1 text-slate-500 text-sm">
-              {habits.length === 0 ? "Add the first small thing." : `${completedCount} of ${habits.length} checked off today.`}
+              {habits.length === 0 ? t("subtitleEmpty") : t("subtitleCount", { completed: completedCount, total: habits.length })}
             </p>
           </div>
 
-          {/* Weekly ring */}
           {!loading && habits.length > 0 && <WeeklyRing habits={habits} />}
 
-          {/* List */}
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
@@ -502,19 +491,26 @@ export default function HabitsPage() {
           ) : habits.length === 0 ? null : (
             <div className="space-y-3">
               {habits.map((h) => (
-                <HabitRow key={h.id} habit={h} onToggle={handleToggle} onDelete={handleDelete} onCommitmentChange={handleCommitmentChange} onWeekCountChange={handleWeekCountChange} />
+                <HabitRow
+                  key={h.id}
+                  habit={h}
+                  onToggle={handleToggle}
+                  onDelete={handleDelete}
+                  onCommitmentChange={handleCommitmentChange}
+                  onWeekCountChange={handleWeekCountChange}
+                  localeTag={localeTag}
+                />
               ))}
             </div>
           )}
 
-          {/* Add habit */}
           {showForm ? (
             <form onSubmit={handleAdd} className="space-y-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g. Go to the gym"
+                placeholder={t("addForm.placeholder")}
                 autoFocus
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#3E4A3D]
                            placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
@@ -523,17 +519,17 @@ export default function HabitsPage() {
               <div className="flex gap-2">
                 <button type="submit" disabled={adding || !newName.trim()}
                   className="flex-1 bg-[#7C9082] text-white py-2 rounded-lg text-sm hover:bg-[#6A7C70] disabled:opacity-50 transition"
-                >{adding ? "Saving…" : "Add habit"}</button>
+                >{adding ? t("addForm.saving") : t("addForm.addButton")}</button>
                 <button type="button" onClick={() => { setShowForm(false); setNewName(""); setNewTarget(7); }}
                   className="px-4 py-2 rounded-lg text-sm border border-slate-200 text-slate-500 hover:border-slate-300 transition"
-                >Cancel</button>
+                >{t("addForm.cancelButton")}</button>
               </div>
             </form>
           ) : (
             <button onClick={() => setShowForm(true)}
               className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-slate-400 text-sm
                          hover:border-[#7C9082] hover:text-[#7C9082] transition"
-            >+ Add a habit</button>
+            >{t("addHabitTrigger")}</button>
           )}
 
         </div>

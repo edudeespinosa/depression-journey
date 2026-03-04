@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+type Params = { params: Promise<{ locale: string }> };
+
+export async function GET(request: NextRequest, { params }: Params) {
+  const { locale } = await params;
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
@@ -10,5 +13,5 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(`${origin}/journal`);
+  return NextResponse.redirect(`${origin}/${locale}/journal`);
 }

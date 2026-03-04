@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 
 type Mode = "signin" | "forgot";
 
 export default function LoginPage() {
+  const t = useTranslations("login");
+  const locale = useLocale();
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
@@ -17,7 +20,7 @@ export default function LoginPage() {
 
   const supabase = createClient();
 
-  async function handleSignIn(e: React.FormEvent) {
+  async function handleSignIn(e: { preventDefault(): void }) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -28,25 +31,25 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/journal");
+      router.push(`/${locale}/journal`);
       router.refresh();
     }
   }
 
-  async function handleForgot(e: React.FormEvent) {
+  async function handleForgot(e: { preventDefault(): void }) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/${locale}/auth/callback`,
     });
 
     setLoading(false);
     if (error) {
       setError(error.message);
     } else {
-      setMessage("Check your email for a reset link.");
+      setMessage(t("resetSuccessMessage"));
     }
   }
 
@@ -56,10 +59,10 @@ export default function LoginPage() {
 
         <div className="text-center">
           <h1 className="text-3xl font-light tracking-tight text-[#3E4A3D]">
-            Phantom Prophet
+            {t("title")}
           </h1>
           <p className="mt-2 text-sm text-slate-400">
-            {mode === "signin" ? "Welcome back." : "We'll send you a reset link."}
+            {mode === "signin" ? t("subtitleSignin") : t("subtitleForgot")}
           </p>
         </div>
 
@@ -68,13 +71,13 @@ export default function LoginPage() {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs text-slate-500 mb-1">Email</label>
+            <label className="block text-xs text-slate-500 mb-1">{t("emailLabel")}</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white
                          text-[#3E4A3D] placeholder:text-slate-300
                          focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
@@ -83,7 +86,7 @@ export default function LoginPage() {
 
           {mode === "signin" && (
             <div>
-              <label className="block text-xs text-slate-500 mb-1">Password</label>
+              <label className="block text-xs text-slate-500 mb-1">{t("passwordLabel")}</label>
               <input
                 type="password"
                 required
@@ -97,12 +100,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          {error && (
-            <p className="text-sm text-red-400">{error}</p>
-          )}
-          {message && (
-            <p className="text-sm text-[#7C9082]">{message}</p>
-          )}
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          {message && <p className="text-sm text-[#7C9082]">{message}</p>}
 
           <button
             type="submit"
@@ -111,10 +110,10 @@ export default function LoginPage() {
                        hover:bg-[#6A7C70] disabled:opacity-50 transition"
           >
             {loading
-              ? "Please wait…"
+              ? t("loading")
               : mode === "signin"
-              ? "Sign in"
-              : "Send reset link"}
+              ? t("signinButton")
+              : t("sendResetButton")}
           </button>
         </form>
 
@@ -124,14 +123,14 @@ export default function LoginPage() {
               onClick={() => { setMode("forgot"); setError(""); }}
               className="text-slate-400 hover:text-[#7C9082] transition"
             >
-              Forgot password?
+              {t("forgotLink")}
             </button>
           ) : (
             <button
               onClick={() => { setMode("signin"); setError(""); setMessage(""); }}
               className="text-slate-400 hover:text-[#7C9082] transition"
             >
-              ← Back to sign in
+              {t("backLink")}
             </button>
           )}
         </div>

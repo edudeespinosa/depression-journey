@@ -2,24 +2,27 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-
-const LINKS = [
-  { href: "/journal", label: "Journal" },
-  { href: "/habits",  label: "Habits"  },
-];
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Nav() {
+  const t = useTranslations("nav");
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+
+  const LINKS = [
+    { href: `/${locale}/journal`, label: t("journal") },
+    { href: `/${locale}/habits`,  label: t("habits")  },
+  ];
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push(`/${locale}/login`);
   }
 
-  // Active if exact match or starts with (for /journal/history)
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
   }
@@ -27,15 +30,13 @@ export default function Nav() {
   return (
     <nav className="w-full bg-[#FDFCF8] border-b border-slate-100 px-4 py-3">
       <div className="max-w-2xl mx-auto flex items-center justify-between">
-        {/* Logo */}
         <Link
-          href="/"
+          href={`/${locale}`}
           className="text-sm font-light tracking-wide text-[#3E4A3D] hover:text-[#7C9082] transition"
         >
-          Phantom Prophet
+          {t("brand")}
         </Link>
 
-        {/* Links + sign out */}
         <div className="flex items-center gap-1">
           {LINKS.map(({ href, label }) => (
             <Link
@@ -51,13 +52,15 @@ export default function Nav() {
             </Link>
           ))}
 
+          <LanguageSwitcher />
+
           <div className="w-px h-4 bg-slate-200 mx-2" />
 
           <button
             onClick={handleSignOut}
             className="px-3 py-1.5 rounded-lg text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
           >
-            Sign out
+            {t("signOut")}
           </button>
         </div>
       </div>

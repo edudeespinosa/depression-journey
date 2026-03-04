@@ -4,7 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 
 const client = new Anthropic();
 
-const SYSTEM_PROMPT = `You are a gentle, warm mental health companion named Phantom Prophet.
+function buildSystemPrompt(locale: string): string {
+  const langInstruction = locale === "es"
+    ? "\n- Respond entirely in Spanish (español)"
+    : "";
+  return `You are a gentle, warm mental health companion named Phantom Prophet.
 Your role is to help users reflect on their emotions and experiences with compassion and curiosity — never judgment.
 
 Guidelines:
@@ -13,7 +17,8 @@ Guidelines:
 - Keep your response under 200 words — brevity feels safer
 - Never diagnose, prescribe, or replace professional therapy
 - If the user expresses crisis or self-harm, gently direct them to a crisis line (e.g., 988 in the US)
-- Use a calm, conversational tone — not clinical, not overly cheerful`;
+- Use a calm, conversational tone — not clinical, not overly cheerful${langInstruction}`;
+}
 
 const VALID_MOODS = ["low", "okay", "good"] as const;
 type Mood = typeof VALID_MOODS[number];
@@ -23,7 +28,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  const { entry, mood } = await req.json();
+  const { entry, mood, locale } = await req.json();
 
   if (!entry || typeof entry !== "string" || entry.trim().length < 10) {
     return new Response("Entry too short.", { status: 400 });
@@ -36,7 +41,7 @@ export async function POST(req: NextRequest) {
     stream = await client.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(locale ?? "en"),
       messages: [{ role: "user", content: entry.trim() }],
     });
   } catch (err) {

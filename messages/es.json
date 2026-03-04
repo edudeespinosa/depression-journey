@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "brand": "Phantom Prophet",
+    "journal": "Diario",
+    "habits": "Hábitos",
+    "signOut": "Cerrar sesión"
+  },
+  "landing": {
+    "headline": "Phantom Prophet",
+    "tagline": "El cambio puede ser intimidante—especialmente cuando ya estás dando la batalla. Un compañero gentil para tu camino, a tu ritmo.",
+    "journalCard": {
+      "title": "Diario",
+      "subtitle": "Escribe y reflexiona con IA"
+    },
+    "habitsCard": {
+      "title": "Hábitos",
+      "subtitle": "Pequeños pasos, a tu manera"
+    },
+    "nourishCard": {
+      "title": "Nutrir",
+      "subtitle": "Próximamente"
+    },
+    "ctaJournal": "Abre tu diario",
+    "ctaHabits": "Revisa tus hábitos",
+    "signIn": "Iniciar sesión"
+  },
+  "login": {
+    "title": "Phantom Prophet",
+    "subtitleSignin": "Bienvenido de nuevo.",
+    "subtitleForgot": "Te enviaremos un enlace de restablecimiento.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "passwordLabel": "Contraseña",
+    "signinButton": "Iniciar sesión",
+    "sendResetButton": "Enviar enlace de restablecimiento",
+    "loading": "Por favor espera…",
+    "forgotLink": "¿Olvidaste tu contraseña?",
+    "backLink": "← Volver al inicio de sesión",
+    "resetSuccessMessage": "Revisa tu correo para el enlace de restablecimiento."
+  },
+  "journal": {
+    "title": "Tu Diario",
+    "subtitle": "Escribe lo que sea. Sin reglas, sin juicios.",
+    "pastEntriesLink": "Entradas anteriores →",
+    "moodPrompt": "¿Cómo estás llegando hoy?",
+    "moods": {
+      "low": "Bajo",
+      "okay": "Regular",
+      "good": "Bien"
+    },
+    "textareaPlaceholder": "¿Qué tienes en mente hoy?",
+    "wordCount": "{count, plural, one {# palabra} other {# palabras}}",
+    "reflectButton": "Reflexiona conmigo",
+    "listeningButton": "Escuchando…",
+    "savedMessage": "Guardado en tu diario.",
+    "writeAnotherButton": "Escribe otra entrada",
+    "errorMessage": "Algo salió mal. Verifica tu clave API e intenta de nuevo."
+  },
+  "history": {
+    "title": "Entradas Anteriores",
+    "entryCount": "{count, plural, one {# entrada} other {# entradas}}",
+    "emptyState": "Nada aún. Escribe tu primera entrada.",
+    "emptyReflections": "Tus reflexiones aparecerán aquí.",
+    "firstEntryLink": "Escribe tu primera entrada →",
+    "dateGroups": {
+      "today": "Hoy",
+      "yesterday": "Ayer"
+    }
+  },
+  "habits": {
+    "title": "Tus Hábitos",
+    "subtitleEmpty": "Agrega la primera pequeña cosa.",
+    "subtitleCount": "{completed} de {total} completados hoy.",
+    "weekRing": {
+      "label": "Esta semana",
+      "letsGo": "¡Vamos!",
+      "gettingStarted": "Comenzando",
+      "buildingMomentum": "Ganando impulso",
+      "almostThere": "Casi ahí",
+      "weekComplete": "Semana completa ✨"
+    },
+    "streakBadge": "🔥 {weeks, plural, one {# semana} other {# semanas}} seguidas",
+    "calendarHint": "Toca un día pasado para registrar retroactivamente",
+    "honorSystem": {
+      "confirmAdd": "¿Realmente lo hiciste? Este es tu espacio — sin juicios, solo honestidad. 🌿",
+      "confirmRemove": "Desmarcando este día — solo quiero asegurarme. ¿Cambió algo? 🌿",
+      "yesAdd": "Sí, lo hice",
+      "yesRemove": "Sí, quítalo",
+      "keep": "Mantenerlo",
+      "neverMind": "No importa"
+    },
+    "commitment": {
+      "label": "Estilo de compromiso",
+      "gentle": { "label": "Suave", "description": "Sin presión, solo apareciendo" },
+      "steady": { "label": "Constante", "description": "Construyendo impulso" },
+      "focused": { "label": "Enfocado", "description": "Manteniéndome responsable" }
+    },
+    "targetPicker": {
+      "label": "Veces por semana",
+      "everyDay": "Todos los días",
+      "onceAWeek": "Una vez a la semana",
+      "xTimesAWeek": "{count}× a la semana"
+    },
+    "addForm": {
+      "placeholder": "ej. Ir al gimnasio",
+      "addButton": "Agregar hábito",
+      "saving": "Guardando…",
+      "cancelButton": "Cancelar"
+    },
+    "addHabitTrigger": "+ Agregar un hábito",
+    "ariaComplete": "Marcar completo",
+    "ariaIncomplete": "Marcar incompleto",
+    "calendarLoading": "Cargando…",
+    "weekProgress": "{count}/{target}×",
+    "deleteConfirm": {
+      "yes": "Sí",
+      "no": "No"
+    }
+  }
+}

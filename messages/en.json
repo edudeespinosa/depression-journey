@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "brand": "Phantom Prophet",
+    "journal": "Journal",
+    "habits": "Habits",
+    "signOut": "Sign out"
+  },
+  "landing": {
+    "headline": "Phantom Prophet",
+    "tagline": "Change is intimidating—especially when you're already fighting an uphill battle. A gentle companion for your journey, at your pace.",
+    "journalCard": {
+      "title": "Journal",
+      "subtitle": "Write & reflect with AI"
+    },
+    "habitsCard": {
+      "title": "Habits",
+      "subtitle": "Small steps, your way"
+    },
+    "nourishCard": {
+      "title": "Nourish",
+      "subtitle": "Coming soon"
+    },
+    "ctaJournal": "Open your journal",
+    "ctaHabits": "Check your habits",
+    "signIn": "Sign in"
+  },
+  "login": {
+    "title": "Phantom Prophet",
+    "subtitleSignin": "Welcome back.",
+    "subtitleForgot": "We'll send you a reset link.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "signinButton": "Sign in",
+    "sendResetButton": "Send reset link",
+    "loading": "Please wait…",
+    "forgotLink": "Forgot password?",
+    "backLink": "← Back to sign in",
+    "resetSuccessMessage": "Check your email for a reset link."
+  },
+  "journal": {
+    "title": "Your Journal",
+    "subtitle": "Write anything. No rules, no judgment.",
+    "pastEntriesLink": "Past entries →",
+    "moodPrompt": "How are you showing up today?",
+    "moods": {
+      "low": "Low",
+      "okay": "Okay",
+      "good": "Good"
+    },
+    "textareaPlaceholder": "What's on your mind today?",
+    "wordCount": "{count, plural, one {# word} other {# words}}",
+    "reflectButton": "Reflect with me",
+    "listeningButton": "Listening…",
+    "savedMessage": "Saved to your journal.",
+    "writeAnotherButton": "Write another entry",
+    "errorMessage": "Something went wrong. Check your API key and try again."
+  },
+  "history": {
+    "title": "Past Entries",
+    "entryCount": "{count, plural, one {# entry} other {# entries}}",
+    "emptyState": "Nothing yet. Write your first entry.",
+    "emptyReflections": "Your reflections will appear here.",
+    "firstEntryLink": "Write your first entry →",
+    "dateGroups": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    }
+  },
+  "habits": {
+    "title": "Your Habits",
+    "subtitleEmpty": "Add the first small thing.",
+    "subtitleCount": "{completed} of {total} checked off today.",
+    "weekRing": {
+      "label": "This week",
+      "letsGo": "Let's go",
+      "gettingStarted": "Getting started",
+      "buildingMomentum": "Building momentum",
+      "almostThere": "Almost there",
+      "weekComplete": "Week complete ✨"
+    },
+    "streakBadge": "🔥 {weeks, plural, one {# week} other {# weeks}} in a row",
+    "calendarHint": "Tap a past day to log retroactively",
+    "honorSystem": {
+      "confirmAdd": "Did you actually do this? This is your space — no judgment, just honesty. 🌿",
+      "confirmRemove": "Unmarking this day — just want to make sure. Did something change? 🌿",
+      "yesAdd": "Yes, I did it",
+      "yesRemove": "Yes, remove it",
+      "keep": "Keep it",
+      "neverMind": "Never mind"
+    },
+    "commitment": {
+      "label": "Commitment style",
+      "gentle": { "label": "Gentle", "description": "No pressure, just showing up" },
+      "steady": { "label": "Steady", "description": "Building momentum" },
+      "focused": { "label": "Focused", "description": "Staying accountable" }
+    },
+    "targetPicker": {
+      "label": "Times per week",
+      "everyDay": "Every day",
+      "onceAWeek": "Once a week",
+      "xTimesAWeek": "{count}× a week"
+    },
+    "addForm": {
+      "placeholder": "e.g. Go to the gym",
+      "addButton": "Add habit",
+      "saving": "Saving…",
+      "cancelButton": "Cancel"
+    },
+    "addHabitTrigger": "+ Add a habit",
+    "ariaComplete": "Mark complete",
+    "ariaIncomplete": "Mark incomplete",
+    "calendarLoading": "Loading…",
+    "weekProgress": "{count}/{target}×",
+    "deleteConfirm": {
+      "yes": "Yes",
+      "no": "No"
+    }
+  }
+}
