@@ -1,0 +1,543 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Nav from "@/components/Nav";
+
+type CommitmentLevel = "gentle" | "steady" | "focused";
+
+type Habit = {
+  id: string;
+  name: string;
+  target_per_week: number;
+  commitment_level: CommitmentLevel;
+  completed: boolean;
+  week_count: number;
+};
+
+const COMMITMENT_CONFIG: Record<CommitmentLevel, { label: string; icon: string; description: string }> = {
+  gentle:  { label: "Gentle",  icon: "🌿", description: "No pressure, just showing up" },
+  steady:  { label: "Steady",  icon: "⚡", description: "Building momentum" },
+  focused: { label: "Focused", icon: "🎯", description: "Staying accountable" },
+};
+
+// ─── Weekly progress ring ─────────────────────────────────────────────────────
+
+function WeeklyRing({ habits }: { habits: Habit[] }) {
+  if (habits.length === 0) return null;
+
+  const totalTarget = habits.reduce((s, h) => s + h.target_per_week, 0);
+  const totalDone = habits.reduce((s, h) => s + Math.min(h.week_count, h.target_per_week), 0);
+  const progress = totalTarget === 0 ? 0 : Math.min(1, totalDone / totalTarget);
+  const pct = Math.round(progress * 100);
+
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - progress * circumference;
+
+  const label =
+    pct === 0 ? "Let's go" :
+    pct < 33  ? "Getting started" :
+    pct < 66  ? "Building momentum" :
+    pct < 100 ? "Almost there" :
+    "Week complete ✨";
+
+  return (
+    <div className="flex items-center gap-6 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
+      {/* Ring */}
+      <div className="relative flex-shrink-0">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          {/* Track */}
+          <circle cx="48" cy="48" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="8" />
+          {/* Progress */}
+          <circle
+            cx="48" cy="48" r={radius}
+            fill="none"
+            stroke="#7C9082"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            transform="rotate(-90 48 48)"
+            style={{ transition: "stroke-dashoffset 0.6s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-lg font-light text-[#3E4A3D]">{pct}%</span>
+        </div>
+      </div>
+
+      {/* Text */}
+      <div>
+        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">This week</p>
+        <p className="text-2xl font-light text-[#3E4A3D]">{totalDone}<span className="text-slate-400 text-base"> / {totalTarget}</span></p>
+        <p className="text-sm text-slate-500 mt-1">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Week progress bar (per habit) ───────────────────────────────────────────
+
+function WeekProgress({ count, target }: { count: number; target: number }) {
+  const dots = Array.from({ length: target }, (_, i) => i < count);
+  return (
+    <div className="flex gap-1 items-center">
+      {dots.map((done, i) => (
+        <div
+          key={i}
+          className={`w-2 h-2 rounded-full transition ${done ? "bg-[#7C9082]" : "bg-slate-200"}`}
+        />
+      ))}
+      <span className="text-[10px] text-slate-400 ml-1">{count}/{target}×</span>
+    </div>
+  );
+}
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+
+type HonorState = { date: string; label: string; wasCompleted: boolean } | null;
+
+function formatDayLabel(dateStr: string): string {
+  return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", {
+    weekday: "long", month: "short", day: "numeric",
+  });
+}
+
+function getWeekStart(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - diff);
+  return mon.toISOString().split("T")[0];
+}
+
+function HabitCalendar({ habitId, onWeekCountChange }: {
+  habitId: string;
+  onWeekCountChange: (delta: number) => void;
+}) {
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [honor, setHonor] = useState<HonorState>(null);
+  const [toggling, setToggling] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/habits/${habitId}/logs?year=${year}&month=${month}`)
+      .then((r) => r.json())
+      .then((dates: string[]) => { setCompletedDates(new Set(dates)); setLoading(false); });
+  }, [habitId, year, month]);
+
+  const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const firstDow = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const todayStr = now.toISOString().split("T")[0];
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
+
+  function prevMonth() {
+    if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1);
+  }
+  function nextMonth() {
+    if (isCurrentMonth) return;
+    if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1);
+  }
+
+  function handleDayClick(dateStr: string) {
+    if (dateStr > todayStr) return; // no future dates
+    if (dateStr === todayStr) {
+      // Today: toggle directly, no confirmation
+      toggleDate(dateStr);
+      return;
+    }
+    // Past day: show honor system confirmation
+    setHonor({ date: dateStr, label: formatDayLabel(dateStr), wasCompleted: completedDates.has(dateStr) });
+  }
+
+  async function toggleDate(dateStr: string) {
+    setToggling(true);
+    setHonor(null);
+    const wasCompleted = completedDates.has(dateStr);
+    const res = await fetch(`/api/habits/${habitId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: dateStr }),
+    });
+    if (res.ok) {
+      setCompletedDates((prev) => {
+        const next = new Set(prev);
+        if (next.has(dateStr)) next.delete(dateStr); else next.add(dateStr);
+        return next;
+      });
+      // Propagate to parent if the toggled date falls in the current week
+      const todayStr = now.toISOString().split("T")[0];
+      const weekStart = getWeekStart();
+      if (dateStr >= weekStart && dateStr <= todayStr) {
+        onWeekCountChange(wasCompleted ? -1 : 1);
+      }
+    }
+    setToggling(false);
+  }
+
+  return (
+    <div className="pt-3 pb-1 space-y-3">
+      {/* Month nav */}
+      <div className="flex items-center justify-between">
+        <button onClick={prevMonth} className="text-slate-400 hover:text-slate-600 text-sm px-1">‹</button>
+        <span className="text-xs text-slate-500 font-medium">{MONTHS[month - 1]} {year}</span>
+        <button onClick={nextMonth} disabled={isCurrentMonth} className="text-slate-400 hover:text-slate-600 text-sm px-1 disabled:opacity-30">›</button>
+      </div>
+
+      {/* Honor system prompt */}
+      {honor && (
+        <div className="bg-[#f5f8f5] border border-[#c8d5c9] rounded-xl px-4 py-3 space-y-2">
+          <p className="text-xs text-[#3E4A3D] font-medium">{honor.label}</p>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            {honor.wasCompleted
+              ? "Unmarking this day — just want to make sure. Did something change? 🌿"
+              : "Did you actually do this? This is your space — no judgment, just honesty. 🌿"}
+          </p>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => toggleDate(honor.date)}
+              disabled={toggling}
+              className="flex-1 bg-[#7C9082] text-white py-1.5 rounded-lg text-xs hover:bg-[#6A7C70] disabled:opacity-50 transition"
+            >
+              {honor.wasCompleted ? "Yes, remove it" : "Yes, I did it"}
+            </button>
+            <button
+              onClick={() => setHonor(null)}
+              className="flex-1 border border-slate-200 text-slate-500 py-1.5 rounded-lg text-xs hover:border-slate-300 transition"
+            >
+              {honor.wasCompleted ? "Keep it" : "Never mind"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Grid */}
+      {loading ? (
+        <div className="h-24 flex items-center justify-center">
+          <span className="text-xs text-slate-300">Loading…</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-7 gap-y-1">
+          {DAYS.map((d, i) => <div key={i} className="text-center text-[10px] text-slate-400 pb-1">{d}</div>)}
+          {Array.from({ length: firstDow }).map((_, i) => <div key={`e-${i}`} />)}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const day = i + 1;
+            const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const isFuture = dateStr > todayStr;
+            const isToday = dateStr === todayStr;
+            const done = completedDates.has(dateStr);
+            const isPending = honor?.date === dateStr;
+
+            return (
+              <div key={day} className="flex items-center justify-center py-0.5">
+                <button
+                  disabled={isFuture || toggling}
+                  onClick={() => handleDayClick(dateStr)}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition ${
+                    isFuture
+                      ? "text-slate-200 cursor-default"
+                      : isPending
+                      ? "ring-2 ring-[#7C9082] text-[#7C9082]"
+                      : done
+                      ? "bg-[#7C9082] text-white hover:bg-[#6A7C70]"
+                      : isToday
+                      ? "ring-1 ring-[#7C9082] text-[#7C9082] hover:bg-[#7C9082]/10"
+                      : "text-slate-400 hover:bg-slate-100"
+                  }`}
+                >{day}</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <p className="text-[10px] text-slate-300 text-center">Tap a past day to log retroactively</p>
+    </div>
+  );
+}
+
+// ─── Commitment selector ──────────────────────────────────────────────────────
+
+function CommitmentSelector({ habitId, current, onChange }: {
+  habitId: string; current: CommitmentLevel; onChange: (l: CommitmentLevel) => void;
+}) {
+  async function select(level: CommitmentLevel) {
+    onChange(level);
+    await fetch(`/api/habits/${habitId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commitment_level: level }),
+    });
+  }
+  return (
+    <div className="pt-3 border-t border-slate-100">
+      <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Commitment style</p>
+      <div className="flex gap-2">
+        {(Object.entries(COMMITMENT_CONFIG) as [CommitmentLevel, typeof COMMITMENT_CONFIG[CommitmentLevel]][]).map(([level, { label, icon }]) => (
+          <button key={level} onClick={() => select(level)} title={COMMITMENT_CONFIG[level].description}
+            className={`flex-1 py-1.5 rounded-lg text-xs border transition ${
+              current === level ? "bg-[#7C9082] text-white border-[#7C9082]" : "border-slate-200 text-slate-500 hover:border-[#7C9082]"
+            }`}
+          >{icon} {label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Streak badge (lazy-loaded on expand) ────────────────────────────────────
+
+function StreakBadge({ habitId }: { habitId: string }) {
+  const [weeks, setWeeks] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/habits/${habitId}/streak`)
+      .then((r) => r.json())
+      .then((d) => setWeeks(d.weeks));
+  }, [habitId]);
+
+  if (weeks === null || weeks === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-[#7C9082]">
+      <span>🔥</span>
+      <span>{weeks} week{weeks !== 1 ? "s" : ""} in a row</span>
+    </div>
+  );
+}
+
+// ─── Habit row ────────────────────────────────────────────────────────────────
+
+function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountChange }: {
+  habit: Habit;
+  onToggle: (h: Habit) => void;
+  onDelete: (id: string) => void;
+  onCommitmentChange: (id: string, level: CommitmentLevel) => void;
+  onWeekCountChange: (id: string, delta: number) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const isFocused = habit.commitment_level === "focused";
+  const weekDone = habit.week_count >= habit.target_per_week;
+
+  return (
+    <div className={`rounded-xl border shadow-sm transition ${
+      isFocused && !weekDone && !habit.completed ? "border-amber-200 bg-amber-50/40" : "border-slate-100 bg-white"
+    }`}>
+      {/* Main row */}
+      <div className="flex items-center gap-3 px-4 py-3 group">
+        {/* Today checkbox */}
+        <button
+          onClick={() => onToggle(habit)}
+          className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition ${
+            habit.completed ? "bg-[#7C9082] border-[#7C9082]" : "border-slate-300 hover:border-[#7C9082]"
+          }`}
+          aria-label={habit.completed ? "Mark incomplete" : "Mark complete"}
+        >
+          {habit.completed && (
+            <svg viewBox="0 0 10 10" className="w-full h-full p-0.5" fill="none">
+              <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+
+        {/* Name + week progress */}
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm ${habit.completed ? "text-slate-400 line-through" : "text-[#3E4A3D]"}`}>
+            {habit.name}
+          </p>
+          <div className="mt-1">
+            <WeekProgress count={habit.week_count} target={habit.target_per_week} />
+          </div>
+        </div>
+
+        {/* Commitment icon */}
+        <span className="text-sm opacity-50">{COMMITMENT_CONFIG[habit.commitment_level].icon}</span>
+
+        {/* Expand */}
+        <button onClick={() => setExpanded(e => !e)} className="text-slate-300 hover:text-slate-500 text-xs transition">
+          {expanded ? "▴" : "▾"}
+        </button>
+
+        {/* Delete */}
+        {showDelete ? (
+          <div className="flex gap-2 items-center">
+            <button onClick={() => onDelete(habit.id)} className="text-xs text-red-400 hover:text-red-600 transition">Yes</button>
+            <button onClick={() => setShowDelete(false)} className="text-xs text-slate-400 hover:text-slate-600 transition">No</button>
+          </div>
+        ) : (
+          <button onClick={() => setShowDelete(true)}
+            className="text-slate-200 hover:text-slate-400 opacity-0 group-hover:opacity-100 transition text-lg leading-none"
+          >×</button>
+        )}
+      </div>
+
+      {/* Expanded panel */}
+      {expanded && (
+        <div className="px-4 pb-4 space-y-3 border-t border-slate-100">
+          <StreakBadge habitId={habit.id} />
+          <HabitCalendar habitId={habit.id} onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)} />
+          <CommitmentSelector habitId={habit.id} current={habit.commitment_level} onChange={(l) => onCommitmentChange(habit.id, l)} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Target per week picker ───────────────────────────────────────────────────
+
+function TargetPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  return (
+    <div>
+      <p className="text-xs text-slate-500 mb-2">Times per week</p>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={`flex-1 py-2 rounded-lg text-xs border transition ${
+              value === n ? "bg-[#7C9082] text-white border-[#7C9082]" : "border-slate-200 text-slate-500 hover:border-[#7C9082]"
+            }`}
+          >{n}</button>
+        ))}
+      </div>
+      <p className="text-[10px] text-slate-400 mt-1 text-center">
+        {value === 7 ? "Every day" : value === 1 ? "Once a week" : `${value}× a week`}
+      </p>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function HabitsPage() {
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState("");
+  const [newTarget, setNewTarget] = useState(7);
+  const [adding, setAdding] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/habits")
+      .then((r) => r.json())
+      .then((data) => { setHabits(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  async function handleToggle(habit: Habit) {
+    setHabits((prev) => prev.map((h) => h.id === habit.id
+      ? { ...h, completed: !h.completed, week_count: h.week_count + (h.completed ? -1 : 1) }
+      : h
+    ));
+    const res = await fetch(`/api/habits/${habit.id}`, { method: "POST" });
+    if (!res.ok) setHabits((prev) => prev.map((h) => h.id === habit.id ? habit : h));
+  }
+
+  async function handleAdd(e: { preventDefault(): void }) {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    setAdding(true);
+    const res = await fetch("/api/habits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName, target_per_week: newTarget }),
+    });
+    if (res.ok) {
+      const habit = await res.json();
+      setHabits((prev) => [...prev, habit]);
+      setNewName("");
+      setNewTarget(7);
+      setShowForm(false);
+    }
+    setAdding(false);
+  }
+
+  async function handleDelete(id: string) {
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+    await fetch(`/api/habits/${id}`, { method: "DELETE" });
+  }
+
+  function handleCommitmentChange(id: string, level: CommitmentLevel) {
+    setHabits((prev) => prev.map((h) => h.id === id ? { ...h, commitment_level: level } : h));
+  }
+
+  function handleWeekCountChange(id: string, delta: number) {
+    setHabits((prev) => prev.map((h) => h.id === id ? { ...h, week_count: Math.max(0, h.week_count + delta) } : h));
+  }
+
+  const completedCount = habits.filter((h) => h.completed).length;
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF8] text-[#3E4A3D] flex flex-col">
+      <Nav />
+      <main className="flex flex-col items-center px-4 py-12 flex-1">
+        <div className="w-full max-w-2xl space-y-6">
+
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-light tracking-tight">Your Habits</h1>
+            <p className="mt-1 text-slate-500 text-sm">
+              {habits.length === 0 ? "Add the first small thing." : `${completedCount} of ${habits.length} checked off today.`}
+            </p>
+          </div>
+
+          {/* Weekly ring */}
+          {!loading && habits.length > 0 && <WeeklyRing habits={habits} />}
+
+          {/* List */}
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
+            </div>
+          ) : habits.length === 0 ? null : (
+            <div className="space-y-3">
+              {habits.map((h) => (
+                <HabitRow key={h.id} habit={h} onToggle={handleToggle} onDelete={handleDelete} onCommitmentChange={handleCommitmentChange} onWeekCountChange={handleWeekCountChange} />
+              ))}
+            </div>
+          )}
+
+          {/* Add habit */}
+          {showForm ? (
+            <form onSubmit={handleAdd} className="space-y-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Go to the gym"
+                autoFocus
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#3E4A3D]
+                           placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
+              />
+              <TargetPicker value={newTarget} onChange={setNewTarget} />
+              <div className="flex gap-2">
+                <button type="submit" disabled={adding || !newName.trim()}
+                  className="flex-1 bg-[#7C9082] text-white py-2 rounded-lg text-sm hover:bg-[#6A7C70] disabled:opacity-50 transition"
+                >{adding ? "Saving…" : "Add habit"}</button>
+                <button type="button" onClick={() => { setShowForm(false); setNewName(""); setNewTarget(7); }}
+                  className="px-4 py-2 rounded-lg text-sm border border-slate-200 text-slate-500 hover:border-slate-300 transition"
+                >Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <button onClick={() => setShowForm(true)}
+              className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-slate-400 text-sm
+                         hover:border-[#7C9082] hover:text-[#7C9082] transition"
+            >+ Add a habit</button>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+}
