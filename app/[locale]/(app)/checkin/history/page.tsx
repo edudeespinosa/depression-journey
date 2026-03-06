@@ -42,7 +42,7 @@ function CheckinCard({ checkin, localeTag }: { checkin: Checkin; localeTag: stri
             <span className="text-xs text-slate-300">{formatTime(checkin.created_at)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#3E4A3D] font-medium">{checkin.emotion}</span>
+            <span className="text-sm text-[#2D3B35] font-medium">{checkin.emotion}</span>
             <span className={`text-xs font-light ${intensityColor}`}>{checkin.intensity}%</span>
           </div>
         </div>
@@ -54,7 +54,7 @@ function CheckinCard({ checkin, localeTag }: { checkin: Checkin; localeTag: stri
 
       {expanded && checkin.ai_response && (
         <div className="px-4 pb-4 border-t border-slate-100">
-          <div className="pt-3 px-3 py-3 rounded-lg bg-[#f5f8f5] border border-[#dce8dc] text-sm text-[#3E4A3D] leading-relaxed">
+          <div className="pt-3 px-3 py-3 rounded-lg bg-[#f5f8f5] border border-[#dce8dc] text-sm text-[#2D3B35] leading-relaxed">
             {checkin.ai_response}
           </div>
         </div>

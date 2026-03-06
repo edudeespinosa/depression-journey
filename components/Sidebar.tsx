@@ -106,7 +106,7 @@ export default function Sidebar() {
 
         {/* Brand */}
         <div className="px-5 py-4 border-b border-slate-50">
-          <span className="text-sm font-medium tracking-wide text-[#3E4A3D]">
+          <span className="text-sm font-medium tracking-wide text-[#2D3B35]">
             {t("brand")}
           </span>
         </div>
@@ -122,7 +122,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
                   active
                     ? "bg-[#7C9082]/10 text-[#7C9082] font-medium"
-                    : "text-slate-400 hover:text-[#3E4A3D] hover:bg-slate-50"
+                    : "text-slate-400 hover:text-[#2D3B35] hover:bg-slate-50"
                 }`}
               >
                 <span className={active ? "text-[#7C9082]" : "text-slate-400"}>
@@ -154,7 +154,7 @@ export default function Sidebar() {
 
       {/* ── Mobile: top header ──────────────────────────────────────────── */}
       <header className="flex lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-20 items-center justify-between px-4 h-11">
-        <span className="text-sm font-medium tracking-wide text-[#3E4A3D]">
+        <span className="text-sm font-medium tracking-wide text-[#2D3B35]">
           {t("brand")}
         </span>
         <div className="flex items-center gap-1">

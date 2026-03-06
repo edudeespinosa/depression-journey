@@ -42,7 +42,7 @@ function EntryCard({ entry, localeTag }: { entry: Entry; localeTag: string }) {
             <span className="text-xs text-slate-400">{formatDate(entry.created_at)}</span>
             <span className="text-xs text-slate-300">{formatTime(entry.created_at)}</span>
           </div>
-          <p className="text-sm text-[#3E4A3D] leading-relaxed line-clamp-2">
+          <p className="text-sm text-[#2D3B35] leading-relaxed line-clamp-2">
             {entry.content}
           </p>
         </div>
@@ -59,7 +59,7 @@ function EntryCard({ entry, localeTag }: { entry: Entry; localeTag: string }) {
           </div>
 
           {entry.ai_response && (
-            <div className="px-3 py-3 rounded-lg bg-[#f5f8f5] border border-[#dce8dc] text-sm text-[#3E4A3D] leading-relaxed whitespace-pre-wrap">
+            <div className="px-3 py-3 rounded-lg bg-[#f6f4fc] border border-[#d5cff0] text-sm text-[#2D3B35] leading-relaxed whitespace-pre-wrap">
               {entry.ai_response}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function JournalHistoryPage() {
         ) : entries.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-slate-400 text-sm">{t("emptyReflections")}</p>
-            <Link href={`/${locale}/journal`} className="mt-4 inline-block text-sm text-[#7C9082] hover:underline">
+            <Link href={`/${locale}/journal`} className="mt-4 inline-block text-sm text-[#8B7EC8] hover:underline">
               {t("firstEntryLink")}
             </Link>
           </div>

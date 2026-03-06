@@ -77,7 +77,7 @@ export default function JournalPage() {
             <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
             <p className="mt-1 text-slate-500 text-sm">{t("subtitle")}</p>
           </div>
-          <Link href={`/${locale}/journal/history`} className="text-xs text-slate-400 hover:text-[#7C9082] transition pb-1">
+          <Link href={`/${locale}/journal/history`} className="text-xs text-slate-400 hover:text-[#8B7EC8] transition pb-1">
             {t("pastEntriesLink")}
           </Link>
         </div>
@@ -96,8 +96,8 @@ export default function JournalPage() {
                     disabled={state === "loading" || state === "streaming"}
                     className={`flex-1 flex flex-col items-center py-2 rounded-xl border text-sm transition disabled:opacity-50 ${
                       mood === value
-                        ? "border-[#7C9082] bg-[#7C9082]/10 text-[#3E4A3D]"
-                        : "border-slate-200 text-slate-400 hover:border-[#7C9082]"
+                        ? "border-[#8B7EC8] bg-[#8B7EC8]/10 text-[#2D3B35]"
+                        : "border-slate-200 text-slate-400 hover:border-[#8B7EC8]"
                     }`}
                   >
                     <span className="text-xl">{icon}</span>
@@ -115,8 +115,8 @@ export default function JournalPage() {
               rows={7}
               disabled={state === "loading" || state === "streaming"}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white
-                         text-[#3E4A3D] placeholder:text-slate-300
-                         focus:outline-none focus:ring-1 focus:ring-[#7C9082]
+                         text-[#2D3B35] placeholder:text-slate-300
+                         focus:outline-none focus:ring-1 focus:ring-[#8B7EC8]
                          resize-none leading-relaxed disabled:opacity-60 transition"
             />
             <div className="flex items-center justify-between">
@@ -124,8 +124,8 @@ export default function JournalPage() {
               <button
                 onClick={handleReflect}
                 disabled={!canSubmit}
-                className="bg-[#7C9082] text-white px-6 py-2 rounded-lg text-sm
-                           hover:bg-[#6A7C70] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="bg-[#8B7EC8] text-white px-6 py-2 rounded-lg text-sm
+                           hover:bg-[#7A6DB8] disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
                 {state === "loading" ? t("listeningButton") : t("reflectButton")}
               </button>
@@ -145,10 +145,10 @@ export default function JournalPage() {
               <p className="whitespace-pre-wrap">{entry}</p>
             </div>
 
-            <div className="px-4 py-4 rounded-xl bg-white border border-[#c8d5c9] leading-relaxed whitespace-pre-wrap text-[#3E4A3D]">
+            <div className="px-4 py-4 rounded-xl bg-white border border-[#d5cff0] leading-relaxed whitespace-pre-wrap text-[#2D3B35]">
               {reflection}
               {state === "streaming" && (
-                <span className="inline-block w-1 h-4 ml-1 bg-[#7C9082] animate-pulse rounded-sm" />
+                <span className="inline-block w-1 h-4 ml-1 bg-[#8B7EC8] animate-pulse rounded-sm" />
               )}
             </div>
 
@@ -158,7 +158,7 @@ export default function JournalPage() {
                 <button
                   onClick={handleNew}
                   className="w-full py-2 rounded-lg border border-slate-200 text-slate-500
-                             hover:border-[#7C9082] hover:text-[#7C9082] text-sm transition"
+                             hover:border-[#8B7EC8] hover:text-[#8B7EC8] text-sm transition"
                 >
                   {t("writeAnotherButton")}
                 </button>

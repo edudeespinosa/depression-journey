@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ── Phantom Prophet palette ───────────────────────────────────────────
+     Sage    #7C9082  — primary chrome, check-in, habits (grounding/growth)
+     Amber   #D4956A  — achievements, streaks, completions (warmth/reward)
+     Lavender #8B7EC8 — journal, reflection, introspection (depth/insight)
+     Text    #2D3B35  — body text (neutral dark, less green-tinted than before)
+     BG      #FDFCF8  — warm cream base
+  ─────────────────────────────────────────────────────────────────────── */
 }
 
 @media (prefers-color-scheme: dark) {

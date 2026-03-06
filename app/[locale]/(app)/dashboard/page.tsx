@@ -234,7 +234,7 @@ export default function DashboardPage() {
         <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">
           {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
         </p>
-        <h1 className="text-2xl font-light text-[#3E4A3D]">{greeting()}</h1>
+        <h1 className="text-2xl font-light text-[#2D3B35]">{greeting()}</h1>
       </div>
 
       {loading ? (
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t("streakLabel")}</p>
                 <span className="text-base">🔥</span>
               </div>
-              <p className="text-3xl font-light text-[#3E4A3D]">
+              <p className="text-3xl font-light text-[#D4956A]">
                 {streak > 0 ? streak : "—"}
               </p>
               <p className="text-xs text-slate-400 mt-1">{streak === 1 ? "day" : "days"}</p>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t("habitsTodayLabel")}</p>
                 <span className="text-base">✓</span>
               </div>
-              <p className="text-3xl font-light text-[#3E4A3D]">
+              <p className="text-3xl font-light text-[#D4956A]">
                 {habits.length > 0 ? completedToday : "—"}
               </p>
               {habits.length > 0 && (
@@ -304,7 +304,7 @@ export default function DashboardPage() {
                       onClick={() => setTab(v)}
                       className={`px-3 py-1 rounded-md text-xs transition ${
                         tab === v
-                          ? "bg-white text-[#3E4A3D] shadow-sm font-medium"
+                          ? "bg-white text-[#2D3B35] shadow-sm font-medium"
                           : "text-slate-400 hover:text-slate-600"
                       }`}
                     >
@@ -367,14 +367,14 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-slate-500">Today</span>
-                    <span className="text-xs font-medium text-[#3E4A3D]">{completedToday}/{habits.length}</span>
+                    <span className="text-xs font-medium text-[#D4956A]">{completedToday}/{habits.length}</span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                     <div
                       className="h-2 rounded-full transition-all duration-700"
                       style={{
                         width: `${(completedToday / habits.length) * 100}%`,
-                        background: "linear-gradient(90deg, #7C9082, #a0b8a5)",
+                        background: "linear-gradient(90deg, #D4956A, #e8b897)",
                       }}
                     />
                   </div>

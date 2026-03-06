@@ -239,7 +239,7 @@ export default function CheckinPage() {
               msg.role === "assistant" ? (
                 <div
                   key={i}
-                  className="px-5 py-4 rounded-xl bg-white border border-[#c8d5c9] text-[#3E4A3D] leading-relaxed text-sm"
+                  className="px-5 py-4 rounded-xl bg-white border border-[#c8d5c9] text-[#2D3B35] leading-relaxed text-sm"
                 >
                   {msg.content}
                 </div>
@@ -255,7 +255,7 @@ export default function CheckinPage() {
 
             {/* Streaming response */}
             {state === "streaming" && (
-              <div className="px-5 py-4 rounded-xl bg-white border border-[#c8d5c9] text-[#3E4A3D] leading-relaxed text-sm">
+              <div className="px-5 py-4 rounded-xl bg-white border border-[#c8d5c9] text-[#2D3B35] leading-relaxed text-sm">
                 {response}
                 <span className="inline-block w-1 h-4 ml-1 bg-[#7C9082] animate-pulse rounded-sm" />
               </div>
@@ -282,7 +282,7 @@ export default function CheckinPage() {
                   }}
                   placeholder={t("replyPlaceholder")}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-[#3E4A3D]
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-[#2D3B35]
                              placeholder-slate-300 resize-none focus:outline-none focus:border-[#7C9082] transition bg-white"
                 />
                 <div className="flex gap-2">
