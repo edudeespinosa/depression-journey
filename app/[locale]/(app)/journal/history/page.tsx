@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Nav from "@/components/Nav";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -116,43 +115,40 @@ export default function JournalHistoryPage() {
   const groups = groupByDate(entries);
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] text-[#3E4A3D] flex flex-col">
-      <Nav />
-      <main className="flex flex-col items-center px-4 py-12 flex-1">
-        <div className="w-full max-w-2xl space-y-8">
+    <main className="flex flex-col items-center px-4 py-12 flex-1">
+      <div className="w-full max-w-2xl space-y-8">
 
-          <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
-            <p className="mt-1 text-slate-500 text-sm">
-              {entries.length === 0 && !loading
-                ? t("emptyState")
-                : t("entryCount", { count: entries.length })}
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl bg-slate-100 animate-pulse" />)}
-            </div>
-          ) : entries.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-slate-400 text-sm">{t("emptyReflections")}</p>
-              <Link href={`/${locale}/journal`} className="mt-4 inline-block text-sm text-[#7C9082] hover:underline">
-                {t("firstEntryLink")}
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {groups.map(({ label, entries }) => (
-                <div key={label} className="space-y-3">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{label}</p>
-                  {entries.map((e) => <EntryCard key={e.id} entry={e} localeTag={localeTag} />)}
-                </div>
-              ))}
-            </div>
-          )}
+        <div>
+          <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
+          <p className="mt-1 text-slate-500 text-sm">
+            {entries.length === 0 && !loading
+              ? t("emptyState")
+              : t("entryCount", { count: entries.length })}
+          </p>
         </div>
-      </main>
-    </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl bg-slate-100 animate-pulse" />)}
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-slate-400 text-sm">{t("emptyReflections")}</p>
+            <Link href={`/${locale}/journal`} className="mt-4 inline-block text-sm text-[#7C9082] hover:underline">
+              {t("firstEntryLink")}
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {groups.map(({ label, entries }) => (
+              <div key={label} className="space-y-3">
+                <p className="text-xs uppercase tracking-widest text-slate-400">{label}</p>
+                {entries.map((e) => <EntryCard key={e.id} entry={e} localeTag={localeTag} />)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

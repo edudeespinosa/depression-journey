@@ -1,9 +1,34 @@
 {
   "nav": {
     "brand": "Phantom Prophet",
+    "dashboard": "Home",
+    "checkin": "Check-in",
     "journal": "Journal",
     "habits": "Habits",
     "signOut": "Sign out"
+  },
+  "dashboard": {
+    "title": "Your Journey",
+    "subtitle": "A snapshot of how you've been.",
+    "streakLabel": "day check-in streak",
+    "habitsTodayLabel": "habits today",
+    "habitsWeekLabel": "This week",
+    "moodSection": "Mood",
+    "tab14": "14d",
+    "tab30": "30d",
+    "emotionsSection": "Emotion patterns",
+    "habitsSection": "Habits",
+    "noCheckins": "No check-ins in this period yet.",
+    "noHabits": "Add your first habit →",
+    "goToHabits": "Go to habits →",
+    "goToCheckin": "Check in for today →",
+    "categories": {
+      "positive": "Positive",
+      "low": "Low",
+      "angry": "Angry",
+      "anxious": "Anxious",
+      "complex": "Complex"
+    }
   },
   "landing": {
     "headline": "Phantom Prophet",
@@ -115,6 +140,61 @@
     "deleteConfirm": {
       "yes": "Yes",
       "no": "No"
+    }
+  },
+  "checkin": {
+    "title": "How are you feeling?",
+    "subtitle": "A moment to check in with yourself.",
+    "intensityLabel": "How intense is this feeling?",
+    "intensityLow": "barely there",
+    "intensityHigh": "overwhelming",
+    "reflectButton": "Reflect",
+    "listeningButton": "Reflecting…",
+    "savedMessage": "Saved privately. 🔒",
+    "newCheckin": "Check in again",
+    "historyLink": "Past check-ins →",
+    "history": {
+      "title": "Your Check-in History",
+      "empty": "No check-ins yet.",
+      "emptyLink": "Do your first check-in →",
+      "count": "{count, plural, one {# check-in} other {# check-ins}}",
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "replyPlaceholder": "Share what comes up for you…",
+    "sendButton": "Send",
+    "finishButton": "Done",
+    "emotions": {
+      "happy": "Happy",
+      "ecstatic": "Ecstatic",
+      "confident": "Confident",
+      "hopeful": "Hopeful",
+      "in_love": "In love",
+      "proud": "Proud",
+      "sad": "Sad",
+      "depressed": "Depressed",
+      "lonely": "Lonely",
+      "bored": "Bored",
+      "exhausted": "Exhausted",
+      "grieved": "Grieved",
+      "angry": "Angry",
+      "frustrated": "Frustrated",
+      "enraged": "Enraged",
+      "resentful": "Resentful",
+      "anxious": "Anxious",
+      "scared": "Scared",
+      "terrified": "Terrified",
+      "cautious": "Cautious",
+      "confused": "Confused",
+      "ashamed": "Ashamed",
+      "guilty": "Guilty",
+      "jealous": "Jealous",
+      "disgusted": "Disgusted",
+      "suspicious": "Suspicious",
+      "overwhelmed": "Overwhelmed",
+      "frantic": "Frantic",
+      "timid": "Timid",
+      "surprised": "Surprised"
     }
   }
 }

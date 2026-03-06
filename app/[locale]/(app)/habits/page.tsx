@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Nav from "@/components/Nav";
 import { useTranslations, useLocale } from "next-intl";
 
 type CommitmentLevel = "gentle" | "steady" | "focused";
@@ -284,7 +283,7 @@ function CommitmentSelector({ habitId, current, onChange }: {
   );
 }
 
-// ─── Streak badge (lazy-loaded on expand) ────────────────────────────────────
+// ─── Streak badge ─────────────────────────────────────────────────────────────
 
 function StreakBadge({ habitId }: { habitId: string }) {
   const t = useTranslations("habits");
@@ -470,70 +469,67 @@ export default function HabitsPage() {
   const completedCount = habits.filter((h) => h.completed).length;
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] text-[#3E4A3D] flex flex-col">
-      <Nav />
-      <main className="flex flex-col items-center px-4 py-12 flex-1">
-        <div className="w-full max-w-2xl space-y-6">
+    <main className="flex flex-col items-center px-4 py-12 flex-1">
+      <div className="w-full max-w-2xl space-y-6">
 
-          <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
-            <p className="mt-1 text-slate-500 text-sm">
-              {habits.length === 0 ? t("subtitleEmpty") : t("subtitleCount", { completed: completedCount, total: habits.length })}
-            </p>
-          </div>
-
-          {!loading && habits.length > 0 && <WeeklyRing habits={habits} />}
-
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
-            </div>
-          ) : habits.length === 0 ? null : (
-            <div className="space-y-3">
-              {habits.map((h) => (
-                <HabitRow
-                  key={h.id}
-                  habit={h}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                  onCommitmentChange={handleCommitmentChange}
-                  onWeekCountChange={handleWeekCountChange}
-                  localeTag={localeTag}
-                />
-              ))}
-            </div>
-          )}
-
-          {showForm ? (
-            <form onSubmit={handleAdd} className="space-y-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder={t("addForm.placeholder")}
-                autoFocus
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#3E4A3D]
-                           placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
-              />
-              <TargetPicker value={newTarget} onChange={setNewTarget} />
-              <div className="flex gap-2">
-                <button type="submit" disabled={adding || !newName.trim()}
-                  className="flex-1 bg-[#7C9082] text-white py-2 rounded-lg text-sm hover:bg-[#6A7C70] disabled:opacity-50 transition"
-                >{adding ? t("addForm.saving") : t("addForm.addButton")}</button>
-                <button type="button" onClick={() => { setShowForm(false); setNewName(""); setNewTarget(7); }}
-                  className="px-4 py-2 rounded-lg text-sm border border-slate-200 text-slate-500 hover:border-slate-300 transition"
-                >{t("addForm.cancelButton")}</button>
-              </div>
-            </form>
-          ) : (
-            <button onClick={() => setShowForm(true)}
-              className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-slate-400 text-sm
-                         hover:border-[#7C9082] hover:text-[#7C9082] transition"
-            >{t("addHabitTrigger")}</button>
-          )}
-
+        <div>
+          <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
+          <p className="mt-1 text-slate-500 text-sm">
+            {habits.length === 0 ? t("subtitleEmpty") : t("subtitleCount", { completed: completedCount, total: habits.length })}
+          </p>
         </div>
-      </main>
-    </div>
+
+        {!loading && habits.length > 0 && <WeeklyRing habits={habits} />}
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
+          </div>
+        ) : habits.length === 0 ? null : (
+          <div className="space-y-3">
+            {habits.map((h) => (
+              <HabitRow
+                key={h.id}
+                habit={h}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+                onCommitmentChange={handleCommitmentChange}
+                onWeekCountChange={handleWeekCountChange}
+                localeTag={localeTag}
+              />
+            ))}
+          </div>
+        )}
+
+        {showForm ? (
+          <form onSubmit={handleAdd} className="space-y-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder={t("addForm.placeholder")}
+              autoFocus
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#3E4A3D]
+                         placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
+            />
+            <TargetPicker value={newTarget} onChange={setNewTarget} />
+            <div className="flex gap-2">
+              <button type="submit" disabled={adding || !newName.trim()}
+                className="flex-1 bg-[#7C9082] text-white py-2 rounded-lg text-sm hover:bg-[#6A7C70] disabled:opacity-50 transition"
+              >{adding ? t("addForm.saving") : t("addForm.addButton")}</button>
+              <button type="button" onClick={() => { setShowForm(false); setNewName(""); setNewTarget(7); }}
+                className="px-4 py-2 rounded-lg text-sm border border-slate-200 text-slate-500 hover:border-slate-300 transition"
+              >{t("addForm.cancelButton")}</button>
+            </div>
+          </form>
+        ) : (
+          <button onClick={() => setShowForm(true)}
+            className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-slate-400 text-sm
+                       hover:border-[#7C9082] hover:text-[#7C9082] transition"
+          >{t("addHabitTrigger")}</button>
+        )}
+
+      </div>
+    </main>
   );
 }

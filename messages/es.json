@@ -1,9 +1,34 @@
 {
   "nav": {
     "brand": "Phantom Prophet",
+    "dashboard": "Inicio",
+    "checkin": "Check-in",
     "journal": "Diario",
     "habits": "Hábitos",
     "signOut": "Cerrar sesión"
+  },
+  "dashboard": {
+    "title": "Tu camino",
+    "subtitle": "Un vistazo de cómo has estado.",
+    "streakLabel": "días de racha",
+    "habitsTodayLabel": "hábitos hoy",
+    "habitsWeekLabel": "Esta semana",
+    "moodSection": "Estado de ánimo",
+    "tab14": "14d",
+    "tab30": "30d",
+    "emotionsSection": "Patrones emocionales",
+    "habitsSection": "Hábitos",
+    "noCheckins": "Sin check-ins en este período.",
+    "noHabits": "Agrega tu primer hábito →",
+    "goToHabits": "Ir a hábitos →",
+    "goToCheckin": "Hacer check-in de hoy →",
+    "categories": {
+      "positive": "Positivo",
+      "low": "Bajo",
+      "angry": "Enojado",
+      "anxious": "Ansioso",
+      "complex": "Complejo"
+    }
   },
   "landing": {
     "headline": "Phantom Prophet",
@@ -115,6 +140,61 @@
     "deleteConfirm": {
       "yes": "Sí",
       "no": "No"
+    }
+  },
+  "checkin": {
+    "title": "¿Cómo te sientes?",
+    "subtitle": "Un momento para conectar contigo mismo.",
+    "intensityLabel": "¿Qué tan intensa es esta sensación?",
+    "intensityLow": "apenas perceptible",
+    "intensityHigh": "abrumador",
+    "reflectButton": "Reflexionar",
+    "listeningButton": "Reflexionando…",
+    "savedMessage": "Guardado de forma privada. 🔒",
+    "newCheckin": "Hacer otro check-in",
+    "historyLink": "Check-ins anteriores →",
+    "history": {
+      "title": "Tu historial de check-ins",
+      "empty": "Sin check-ins todavía.",
+      "emptyLink": "Haz tu primer check-in →",
+      "count": "{count, plural, one {# check-in} other {# check-ins}}",
+      "today": "Hoy",
+      "yesterday": "Ayer"
+    },
+    "replyPlaceholder": "Comparte lo que surge para ti…",
+    "sendButton": "Enviar",
+    "finishButton": "Listo",
+    "emotions": {
+      "happy": "Alegre",
+      "ecstatic": "Extasiado",
+      "confident": "Confiado",
+      "hopeful": "Esperanzado",
+      "in_love": "Enamorado",
+      "proud": "Presumido",
+      "sad": "Triste",
+      "depressed": "Deprimido",
+      "lonely": "Solo",
+      "bored": "Aburrido",
+      "exhausted": "Exhausto",
+      "grieved": "Apenado",
+      "angry": "Enojado",
+      "frustrated": "Frustrado",
+      "enraged": "Enfurecido",
+      "resentful": "Malévolo",
+      "anxious": "Ansioso",
+      "scared": "Asustado",
+      "terrified": "Aterrado",
+      "cautious": "Precavido",
+      "confused": "Confuso",
+      "ashamed": "Avergonzado",
+      "guilty": "Culpable",
+      "jealous": "Celoso",
+      "disgusted": "Desagrado",
+      "suspicious": "Sospechoso",
+      "overwhelmed": "Abrumado",
+      "frantic": "Histérico",
+      "timid": "Tímido",
+      "surprised": "Sorprendido"
     }
   }
 }

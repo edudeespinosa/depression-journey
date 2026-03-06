@@ -13,8 +13,10 @@ export default function Nav() {
   const router = useRouter();
 
   const LINKS = [
-    { href: `/${locale}/journal`, label: t("journal") },
-    { href: `/${locale}/habits`,  label: t("habits")  },
+    { href: `/${locale}/dashboard`, label: t("dashboard") },
+    { href: `/${locale}/checkin`,   label: t("checkin") },
+    { href: `/${locale}/journal`,   label: t("journal") },
+    { href: `/${locale}/habits`,    label: t("habits")  },
   ];
 
   async function handleSignOut() {
