@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { safeDecrypt } from "@/lib/encryption";
 
 export async function GET() {
   const supabase = await createClient();
@@ -14,5 +15,9 @@ export async function GET() {
     .limit(60);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data ?? []);
+  return NextResponse.json((data ?? []).map((e) => ({
+    ...e,
+    content: safeDecrypt(e.content),
+    ai_response: safeDecrypt(e.ai_response),
+  })));
 }

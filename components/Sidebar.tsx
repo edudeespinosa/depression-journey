@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -43,6 +44,16 @@ function IconCheck({ active }: { active: boolean }) {
   );
 }
 
+function IconBrain({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={active ? "2" : "1.5"} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+    </svg>
+  );
+}
+
 function IconMobileHome() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -76,17 +87,57 @@ function IconMobileCheck() {
   );
 }
 
+function IconMobileBrain() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+    </svg>
+  );
+}
+
+function IconBriefcase({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={active ? "2" : "1.5"} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+    </svg>
+  );
+}
+
+function IconMobileBriefcase() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+    </svg>
+  );
+}
+
 export default function Sidebar() {
   const t = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const [isTherapist, setIsTherapist] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/therapist/me")
+      .then((r) => r.json())
+      .then((d) => { setIsTherapist(!!d?.therapist); })
+      .catch(() => {});
+  }, [pathname]); // re-check on every navigation so activation reflects immediately
 
   const LINKS = [
     { href: `/${locale}/dashboard`, label: t("dashboard"), Icon: IconHome,       MobileIcon: IconMobileHome  },
     { href: `/${locale}/checkin`,   label: t("checkin"),   Icon: IconHeart,      MobileIcon: IconMobileHeart },
     { href: `/${locale}/journal`,   label: t("journal"),   Icon: IconPen,        MobileIcon: IconMobilePen   },
-    { href: `/${locale}/habits`,    label: t("habits"),    Icon: IconCheck,      MobileIcon: IconMobileCheck },
+    { href: `/${locale}/habits`,          label: t("habits"),         Icon: IconCheck,      MobileIcon: IconMobileCheck  },
+    { href: `/${locale}/thought-records`, label: t("thoughtRecords"), Icon: IconBrain,      MobileIcon: IconMobileBrain  },
+    ...(isTherapist ? [{ href: `/${locale}/portal`, label: t("portal"), Icon: IconBriefcase, MobileIcon: IconMobileBriefcase }] : []),
   ];
 
   async function handleSignOut() {

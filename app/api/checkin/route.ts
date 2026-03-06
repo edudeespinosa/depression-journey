@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { encrypt, safeDecrypt } from "@/lib/encryption";
 
 const client = new Anthropic();
 
@@ -44,7 +45,8 @@ export async function GET() {
     .limit(1)
     .maybeSingle();
 
-  return NextResponse.json(data ?? null);
+  if (!data) return NextResponse.json(null);
+  return NextResponse.json({ ...data, ai_response: safeDecrypt(data.ai_response) });
 }
 
 export async function POST(req: NextRequest) {
@@ -100,7 +102,7 @@ export async function POST(req: NextRequest) {
             user_id: user.id,
             emotion,
             intensity,
-            ai_response: fullResponse,
+            ai_response: encrypt(fullResponse),
           });
         }
       } catch (err) {

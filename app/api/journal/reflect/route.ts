@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { encrypt } from "@/lib/encryption";
 
 const client = new Anthropic();
 
@@ -65,8 +66,8 @@ export async function POST(req: NextRequest) {
         // Save to DB after stream completes successfully
         await supabase.from("journal_entries").insert({
           user_id: user.id,
-          content: entry.trim(),
-          ai_response: fullResponse,
+          content: encrypt(entry.trim()),
+          ai_response: encrypt(fullResponse),
           mood: validMood,
         });
       } catch (err) {

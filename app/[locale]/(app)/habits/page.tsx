@@ -169,10 +169,13 @@ function getWeekStart(): string {
   return mon.toISOString().split("T")[0];
 }
 
-function HabitCalendar({ habitId, timesPerDay, onWeekCountChange, localeTag }: {
+function HabitCalendar({ habitId, scheduleType, scheduledDays, timesPerDay, onWeekCountChange, onDayToggle, localeTag }: {
   habitId: string;
+  scheduleType: ScheduleType;
+  scheduledDays: number[] | null;
   timesPerDay: number;
   onWeekCountChange: (delta: number) => void;
+  onDayToggle?: (isoWeekday: number, added: boolean) => void;
   localeTag: string;
 }) {
   const t = useTranslations("habits");
@@ -244,6 +247,9 @@ function HabitCalendar({ habitId, timesPerDay, onWeekCountChange, localeTag }: {
       const weekStart = getWeekStart();
       if (dateStr >= weekStart && dateStr <= todayStr) {
         onWeekCountChange(wasCompleted ? -1 : 1);
+        const dow = new Date(dateStr + "T12:00:00").getDay();
+        const isoDay = dow === 0 ? 7 : dow;
+        onDayToggle?.(isoDay, !wasCompleted);
       }
     }
     setToggling(false);
@@ -299,13 +305,21 @@ function HabitCalendar({ habitId, timesPerDay, onWeekCountChange, localeTag }: {
             const partial = count > 0 && !done;
             const isPending = honor?.date === dateStr;
 
+            // For specific_days: check whether this calendar day is a scheduled day
+            const dateDow = new Date(dateStr + "T12:00:00").getDay();
+            const dateIso = dateDow === 0 ? 7 : dateDow;
+            const isOffSchedule =
+              scheduleType === "specific_days" &&
+              scheduledDays != null &&
+              !scheduledDays.includes(dateIso);
+
             return (
               <div key={day} className="flex items-center justify-center py-0.5">
                 <button
-                  disabled={isFuture || toggling}
+                  disabled={isFuture || toggling || isOffSchedule}
                   onClick={() => handleDayClick(dateStr)}
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition ${
-                    isFuture
+                    isFuture || isOffSchedule
                       ? "text-slate-200 cursor-default"
                       : isPending
                       ? "ring-2 ring-[#7C9082] text-[#7C9082]"
@@ -324,7 +338,9 @@ function HabitCalendar({ habitId, timesPerDay, onWeekCountChange, localeTag }: {
         </div>
       )}
 
-      <p className="text-[10px] text-slate-300 text-center">{t("calendarHint")}</p>
+      <p className="text-[10px] text-slate-300 text-center">
+        {scheduleType === "specific_days" ? t("calendarHintScheduled") : t("calendarHint")}
+      </p>
     </div>
   );
 }
@@ -404,12 +420,8 @@ function HabitRow({ habit, onToggle, onDailyCount, onDelete, onCommitmentChange,
     ? (habit.scheduled_days ?? []).includes(todayIso)
     : true;
 
-  // Build completedDays set for specific_days (which ISO weekdays were done this week)
-  // We approximate from week_count — the full set requires extra data; for now we derive from calendar
-  // We'll pass an empty set and let the calendar handle truth; for the row display we show week_count
   const scheduledDays = habit.scheduled_days ?? [];
-
-  const completedDaysApprox = new Set<number>(habit.completed_week_days);
+  const [completedDays, setCompletedDays] = useState<Set<number>>(new Set(habit.completed_week_days));
 
   return (
     <div className={`rounded-xl border shadow-sm transition ${
@@ -478,7 +490,7 @@ function HabitRow({ habit, onToggle, onDailyCount, onDelete, onCommitmentChange,
             {habit.schedule_type === "specific_days" && (
               <SpecificDaysProgress
                 scheduledDays={scheduledDays}
-                completedDays={completedDaysApprox}
+                completedDays={completedDays}
                 weekCount={habit.week_count}
               />
             )}
@@ -514,8 +526,15 @@ function HabitRow({ habit, onToggle, onDailyCount, onDelete, onCommitmentChange,
           <StreakBadge habitId={habit.id} />
           <HabitCalendar
             habitId={habit.id}
+            scheduleType={habit.schedule_type}
+            scheduledDays={habit.scheduled_days}
             timesPerDay={habit.times_per_day}
             onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)}
+            onDayToggle={(isoDay, added) => setCompletedDays((prev) => {
+              const next = new Set(prev);
+              if (added) next.add(isoDay); else next.delete(isoDay);
+              return next;
+            })}
             localeTag={localeTag}
           />
           <CommitmentSelector
