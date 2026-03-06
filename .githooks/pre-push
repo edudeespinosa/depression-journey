@@ -1,0 +1,13 @@
+#!/bin/sh
+branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+# Allow pushing from detached HEAD or main/master without restriction
+case "$branch" in
+  main|master) exit 0 ;;
+esac
+
+if ! echo "$branch" | grep -qE '^[^/]+/[^/]+$'; then
+  echo "ERROR: Branch name '$branch' does not follow the required format: <user>/<description>"
+  echo "Example: iakor/add-login-page"
+  exit 1
+fi
