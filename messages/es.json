@@ -140,7 +140,21 @@
     "deleteConfirm": {
       "yes": "Sí",
       "no": "No"
-    }
+    },
+    "schedule": {
+      "label": "Programación",
+      "flexible": "Flexible",
+      "flexibleDesc": "Cualquier día — solo cumple tu meta semanal",
+      "specificDays": "Días específicos",
+      "specificDaysDesc": "Elige qué días de la semana",
+      "dailyCount": "Varias veces al día",
+      "dailyCountDesc": "Registra cuántas veces lo haces cada día"
+    },
+    "days": { "1": "Lu", "2": "Ma", "3": "Mi", "4": "Ju", "5": "Vi", "6": "Sá", "7": "Do" },
+    "timesPerDay": { "label": "Veces por día", "display": "{count}× por día" },
+    "dailyProgress": "{count}/{target} hoy",
+    "notScheduledToday": "No programado hoy",
+    "specificDaysProgress": "{done}/{total} días programados esta semana"
   },
   "checkin": {
     "title": "¿Cómo te sientes?",

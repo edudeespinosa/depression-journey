@@ -140,7 +140,21 @@
     "deleteConfirm": {
       "yes": "Yes",
       "no": "No"
-    }
+    },
+    "schedule": {
+      "label": "Schedule",
+      "flexible": "Flexible",
+      "flexibleDesc": "Any days — just hit your weekly goal",
+      "specificDays": "Specific days",
+      "specificDaysDesc": "Pick which days of the week",
+      "dailyCount": "Multiple times / day",
+      "dailyCountDesc": "Track how many times you do it each day"
+    },
+    "days": { "1": "Mo", "2": "Tu", "3": "We", "4": "Th", "5": "Fr", "6": "Sa", "7": "Su" },
+    "timesPerDay": { "label": "Times per day", "display": "{count}× per day" },
+    "dailyProgress": "{count}/{target} today",
+    "notScheduledToday": "Not scheduled today",
+    "specificDaysProgress": "{done}/{total} scheduled days this week"
   },
   "checkin": {
     "title": "How are you feeling?",

@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const { data, error } = await supabase
     .from("habit_logs")
-    .select("completed_at")
+    .select("completed_at, count")
     .eq("habit_id", id)
     .eq("user_id", user.id)
     .gte("completed_at", from)
@@ -27,5 +27,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json((data ?? []).map((l) => l.completed_at));
+  return NextResponse.json(
+    (data ?? []).map((l) => ({ date: l.completed_at, count: l.count ?? 1 }))
+  );
 }

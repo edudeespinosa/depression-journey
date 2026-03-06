@@ -4,14 +4,20 @@ import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 
 type CommitmentLevel = "gentle" | "steady" | "focused";
+type ScheduleType = "flexible" | "specific_days" | "daily_count";
 
 type Habit = {
   id: string;
   name: string;
   target_per_week: number;
   commitment_level: CommitmentLevel;
+  schedule_type: ScheduleType;
+  scheduled_days: number[] | null;
+  times_per_day: number;
   completed: boolean;
   week_count: number;
+  today_count: number;
+  completed_week_days: number[];
 };
 
 const COMMITMENT_ICONS: Record<CommitmentLevel, string> = {
@@ -20,11 +26,21 @@ const COMMITMENT_ICONS: Record<CommitmentLevel, string> = {
   focused: "🎯",
 };
 
+// ISO weekday number for today (1=Mon..7=Sun)
+function todayIsoWeekday(): number {
+  const dow = new Date().getDay(); // 0=Sun
+  return dow === 0 ? 7 : dow;
+}
+
+function getIsoWeekday(dateStr: string): number {
+  const dow = new Date(dateStr + "T12:00:00").getDay();
+  return dow === 0 ? 7 : dow;
+}
+
 // ─── Weekly progress ring ─────────────────────────────────────────────────────
 
 function WeeklyRing({ habits }: { habits: Habit[] }) {
   const t = useTranslations("habits.weekRing");
-
   if (habits.length === 0) return null;
 
   const totalTarget = habits.reduce((s, h) => s + h.target_per_week, 0);
@@ -50,33 +66,28 @@ function WeeklyRing({ habits }: { habits: Habit[] }) {
           <circle cx="48" cy="48" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="8" />
           <circle
             cx="48" cy="48" r={radius}
-            fill="none"
-            stroke="#7C9082"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
+            fill="none" stroke="#7C9082" strokeWidth="8" strokeLinecap="round"
+            strokeDasharray={circumference} strokeDashoffset={offset}
             transform="rotate(-90 48 48)"
             style={{ transition: "stroke-dashoffset 0.6s ease" }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-lg font-light text-[#3E4A3D]">{pct}%</span>
+          <span className="text-lg font-light text-[#2D3B35]">{pct}%</span>
         </div>
       </div>
-
       <div>
         <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">{t("label")}</p>
-        <p className="text-2xl font-light text-[#3E4A3D]">{totalDone}<span className="text-slate-400 text-base"> / {totalTarget}</span></p>
+        <p className="text-2xl font-light text-[#2D3B35]">{totalDone}<span className="text-slate-400 text-base"> / {totalTarget}</span></p>
         <p className="text-sm text-slate-500 mt-1">{label}</p>
       </div>
     </div>
   );
 }
 
-// ─── Week progress dots (per habit) ──────────────────────────────────────────
+// ─── Flexible week dots ───────────────────────────────────────────────────────
 
-function WeekProgress({ count, target }: { count: number; target: number }) {
+function FlexibleProgress({ count, target }: { count: number; target: number }) {
   const dots = Array.from({ length: target }, (_, i) => i < count);
   return (
     <div className="flex gap-1 items-center">
@@ -88,7 +99,64 @@ function WeekProgress({ count, target }: { count: number; target: number }) {
   );
 }
 
-// ─── Calendar ────────────────────────────────────────────────────────────────
+// ─── Specific days pill row ───────────────────────────────────────────────────
+
+function SpecificDaysProgress({ scheduledDays, completedDays, weekCount }: {
+  scheduledDays: number[];
+  completedDays: Set<number>; // ISO weekdays done this week
+  weekCount: number;
+}) {
+  const t = useTranslations("habits");
+  const todayDow = todayIsoWeekday();
+  const days = [1, 2, 3, 4, 5, 6, 7];
+
+  return (
+    <div className="space-y-1">
+      <div className="flex gap-0.5">
+        {days.map((d) => {
+          const isScheduled = scheduledDays.includes(d);
+          const isDone = completedDays.has(d);
+          const isToday = d === todayDow;
+          return (
+            <div
+              key={d}
+              title={t(`days.${d}`)}
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-medium transition ${
+                !isScheduled
+                  ? "text-slate-200"
+                  : isDone
+                  ? "bg-[#7C9082] text-white"
+                  : isToday
+                  ? "ring-1 ring-[#7C9082] text-[#7C9082]"
+                  : "ring-1 ring-slate-200 text-slate-400"
+              }`}
+            >
+              {t(`days.${d}`).charAt(0)}
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-slate-400">
+        {t("specificDaysProgress", { done: weekCount, total: scheduledDays.length })}
+      </p>
+    </div>
+  );
+}
+
+// ─── Daily count progress ─────────────────────────────────────────────────────
+
+function DailyCountProgress({ weekCount }: { weekCount: number }) {
+  return (
+    <div className="flex gap-1 items-center">
+      {Array.from({ length: 7 }, (_, i) => (
+        <div key={i} className={`w-2 h-2 rounded-full transition ${i < weekCount ? "bg-[#D4956A]" : "bg-slate-200"}`} />
+      ))}
+      <span className="text-[10px] text-slate-400 ml-1">{weekCount}/7d</span>
+    </div>
+  );
+}
+
+// ─── Calendar ─────────────────────────────────────────────────────────────────
 
 type HonorState = { date: string; label: string; wasCompleted: boolean } | null;
 
@@ -101,8 +169,9 @@ function getWeekStart(): string {
   return mon.toISOString().split("T")[0];
 }
 
-function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
+function HabitCalendar({ habitId, timesPerDay, onWeekCountChange, localeTag }: {
   habitId: string;
+  timesPerDay: number;
   onWeekCountChange: (delta: number) => void;
   localeTag: string;
 }) {
@@ -110,7 +179,8 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
+  // Map of date → count
+  const [logMap, setLogMap] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [honor, setHonor] = useState<HonorState>(null);
   const [toggling, setToggling] = useState(false);
@@ -119,7 +189,12 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
     setLoading(true);
     fetch(`/api/habits/${habitId}/logs?year=${year}&month=${month}`)
       .then((r) => r.json())
-      .then((dates: string[]) => { setCompletedDates(new Set(dates)); setLoading(false); });
+      .then((entries: { date: string; count: number }[]) => {
+        const map = new Map<string, number>();
+        for (const e of entries) map.set(e.date, e.count);
+        setLogMap(map);
+        setLoading(false);
+      });
   }, [habitId, year, month]);
 
   const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -146,22 +221,24 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
   function handleDayClick(dateStr: string) {
     if (dateStr > todayStr) return;
     if (dateStr === todayStr) { toggleDate(dateStr); return; }
-    setHonor({ date: dateStr, label: formatDayLabel(dateStr), wasCompleted: completedDates.has(dateStr) });
+    const wasCompleted = (logMap.get(dateStr) ?? 0) >= timesPerDay;
+    setHonor({ date: dateStr, label: formatDayLabel(dateStr), wasCompleted });
   }
 
   async function toggleDate(dateStr: string) {
     setToggling(true);
     setHonor(null);
-    const wasCompleted = completedDates.has(dateStr);
+    const currentCount = logMap.get(dateStr) ?? 0;
+    const wasCompleted = currentCount >= timesPerDay;
     const res = await fetch(`/api/habits/${habitId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ date: dateStr }),
     });
     if (res.ok) {
-      setCompletedDates((prev) => {
-        const next = new Set(prev);
-        if (next.has(dateStr)) next.delete(dateStr); else next.add(dateStr);
+      setLogMap((prev) => {
+        const next = new Map(prev);
+        if (next.has(dateStr)) next.delete(dateStr); else next.set(dateStr, 1);
         return next;
       });
       const weekStart = getWeekStart();
@@ -182,11 +259,9 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
 
       {honor && (
         <div className="bg-[#f5f8f5] border border-[#c8d5c9] rounded-xl px-4 py-3 space-y-2">
-          <p className="text-xs text-[#3E4A3D] font-medium">{honor.label}</p>
+          <p className="text-xs text-[#2D3B35] font-medium">{honor.label}</p>
           <p className="text-xs text-slate-500 leading-relaxed">
-            {honor.wasCompleted
-              ? t("honorSystem.confirmRemove")
-              : t("honorSystem.confirmAdd")}
+            {honor.wasCompleted ? t("honorSystem.confirmRemove") : t("honorSystem.confirmAdd")}
           </p>
           <div className="flex gap-2 pt-1">
             <button
@@ -219,7 +294,9 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
             const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const isFuture = dateStr > todayStr;
             const isToday = dateStr === todayStr;
-            const done = completedDates.has(dateStr);
+            const count = logMap.get(dateStr) ?? 0;
+            const done = count >= timesPerDay;
+            const partial = count > 0 && !done;
             const isPending = honor?.date === dateStr;
 
             return (
@@ -234,6 +311,8 @@ function HabitCalendar({ habitId, onWeekCountChange, localeTag }: {
                       ? "ring-2 ring-[#7C9082] text-[#7C9082]"
                       : done
                       ? "bg-[#7C9082] text-white hover:bg-[#6A7C70]"
+                      : partial
+                      ? "bg-[#D4956A]/30 text-[#D4956A] hover:bg-[#D4956A]/50"
                       : isToday
                       ? "ring-1 ring-[#7C9082] text-[#7C9082] hover:bg-[#7C9082]/10"
                       : "text-slate-400 hover:bg-slate-100"
@@ -296,7 +375,6 @@ function StreakBadge({ habitId }: { habitId: string }) {
   }, [habitId]);
 
   if (weeks === null || weeks === 0) return null;
-
   return (
     <div className="flex items-center gap-1.5 text-xs text-[#7C9082]">
       <span>{t("streakBadge", { weeks })}</span>
@@ -306,9 +384,10 @@ function StreakBadge({ habitId }: { habitId: string }) {
 
 // ─── Habit row ────────────────────────────────────────────────────────────────
 
-function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountChange, localeTag }: {
+function HabitRow({ habit, onToggle, onDailyCount, onDelete, onCommitmentChange, onWeekCountChange, localeTag }: {
   habit: Habit;
   onToggle: (h: Habit) => void;
+  onDailyCount: (id: string, action: "increment" | "decrement") => void;
   onDelete: (id: string) => void;
   onCommitmentChange: (id: string, level: CommitmentLevel) => void;
   onWeekCountChange: (id: string, delta: number) => void;
@@ -320,32 +399,92 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
 
   const isFocused = habit.commitment_level === "focused";
   const weekDone = habit.week_count >= habit.target_per_week;
+  const todayIso = todayIsoWeekday();
+  const isScheduledToday = habit.schedule_type === "specific_days"
+    ? (habit.scheduled_days ?? []).includes(todayIso)
+    : true;
+
+  // Build completedDays set for specific_days (which ISO weekdays were done this week)
+  // We approximate from week_count — the full set requires extra data; for now we derive from calendar
+  // We'll pass an empty set and let the calendar handle truth; for the row display we show week_count
+  const scheduledDays = habit.scheduled_days ?? [];
+
+  const completedDaysApprox = new Set<number>(habit.completed_week_days);
 
   return (
     <div className={`rounded-xl border shadow-sm transition ${
-      isFocused && !weekDone && !habit.completed ? "border-amber-200 bg-amber-50/40" : "border-slate-100 bg-white"
+      isFocused && !weekDone && (habit.schedule_type !== "specific_days" || isScheduledToday) && !habit.completed
+        ? "border-amber-200 bg-amber-50/40"
+        : "border-slate-100 bg-white"
     }`}>
       <div className="flex items-center gap-3 px-4 py-3 group">
-        <button
-          onClick={() => onToggle(habit)}
-          className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition ${
-            habit.completed ? "bg-[#7C9082] border-[#7C9082]" : "border-slate-300 hover:border-[#7C9082]"
-          }`}
-          aria-label={habit.completed ? t("ariaIncomplete") : t("ariaComplete")}
-        >
-          {habit.completed && (
-            <svg viewBox="0 0 10 10" className="w-full h-full p-0.5" fill="none">
-              <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </button>
 
+        {/* Left control — varies by schedule type */}
+        {habit.schedule_type === "daily_count" ? (
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={() => onDailyCount(habit.id, "decrement")}
+              disabled={habit.today_count === 0}
+              className="w-5 h-5 rounded-full border border-slate-200 flex items-center justify-center text-slate-400
+                         hover:border-[#D4956A] hover:text-[#D4956A] disabled:opacity-30 transition text-xs"
+            >−</button>
+            <div className={`min-w-[36px] h-6 rounded-full px-1.5 flex items-center justify-center text-[10px] font-medium transition ${
+              habit.completed
+                ? "bg-[#7C9082] text-white"
+                : habit.today_count > 0
+                ? "bg-[#D4956A]/20 text-[#D4956A]"
+                : "bg-slate-100 text-slate-400"
+            }`}>
+              {habit.today_count}/{habit.times_per_day}
+            </div>
+            <button
+              onClick={() => onDailyCount(habit.id, "increment")}
+              disabled={habit.completed}
+              className="w-5 h-5 rounded-full border border-slate-200 flex items-center justify-center text-slate-400
+                         hover:border-[#7C9082] hover:text-[#7C9082] disabled:opacity-30 transition text-xs"
+            >+</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => isScheduledToday ? onToggle(habit) : undefined}
+            disabled={!isScheduledToday}
+            title={!isScheduledToday ? t("notScheduledToday") : undefined}
+            className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition ${
+              habit.completed
+                ? "bg-[#7C9082] border-[#7C9082]"
+                : !isScheduledToday
+                ? "border-slate-200 opacity-30 cursor-default"
+                : "border-slate-300 hover:border-[#7C9082]"
+            }`}
+            aria-label={habit.completed ? t("ariaIncomplete") : t("ariaComplete")}
+          >
+            {habit.completed && (
+              <svg viewBox="0 0 10 10" className="w-full h-full p-0.5" fill="none">
+                <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
+        )}
+
+        {/* Name + progress */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm ${habit.completed ? "text-slate-400 line-through" : "text-[#3E4A3D]"}`}>
+          <p className={`text-sm ${habit.completed ? "text-slate-400 line-through" : "text-[#2D3B35]"}`}>
             {habit.name}
           </p>
           <div className="mt-1">
-            <WeekProgress count={habit.week_count} target={habit.target_per_week} />
+            {habit.schedule_type === "flexible" && (
+              <FlexibleProgress count={habit.week_count} target={habit.target_per_week} />
+            )}
+            {habit.schedule_type === "specific_days" && (
+              <SpecificDaysProgress
+                scheduledDays={scheduledDays}
+                completedDays={completedDaysApprox}
+                weekCount={habit.week_count}
+              />
+            )}
+            {habit.schedule_type === "daily_count" && (
+              <DailyCountProgress weekCount={habit.week_count} />
+            )}
           </div>
         </div>
 
@@ -369,16 +508,101 @@ function HabitRow({ habit, onToggle, onDelete, onCommitmentChange, onWeekCountCh
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-slate-100">
+          {!isScheduledToday && habit.schedule_type === "specific_days" && (
+            <p className="text-xs text-slate-400 pt-3">{t("notScheduledToday")}</p>
+          )}
           <StreakBadge habitId={habit.id} />
-          <HabitCalendar habitId={habit.id} onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)} localeTag={localeTag} />
-          <CommitmentSelector habitId={habit.id} current={habit.commitment_level} onChange={(l) => onCommitmentChange(habit.id, l)} />
+          <HabitCalendar
+            habitId={habit.id}
+            timesPerDay={habit.times_per_day}
+            onWeekCountChange={(delta) => onWeekCountChange(habit.id, delta)}
+            localeTag={localeTag}
+          />
+          <CommitmentSelector
+            habitId={habit.id}
+            current={habit.commitment_level}
+            onChange={(l) => onCommitmentChange(habit.id, l)}
+          />
         </div>
       )}
     </div>
   );
 }
 
-// ─── Target per week picker ───────────────────────────────────────────────────
+// ─── Schedule type picker (used in add form) ──────────────────────────────────
+
+function SchedulePicker({ value, onChange }: { value: ScheduleType; onChange: (s: ScheduleType) => void }) {
+  const t = useTranslations("habits.schedule");
+  const options: { type: ScheduleType; icon: string }[] = [
+    { type: "flexible",      icon: "🔄" },
+    { type: "specific_days", icon: "📅" },
+    { type: "daily_count",   icon: "🔢" },
+  ];
+  const selectedDesc =
+    value === "flexible" ? t("flexibleDesc") :
+    value === "specific_days" ? t("specificDaysDesc") :
+    t("dailyCountDesc");
+
+  return (
+    <div>
+      <p className="text-xs text-slate-500 mb-2">{t("label")}</p>
+      <div className="flex gap-2">
+        {options.map(({ type, icon }) => {
+          const label = type === "flexible" ? t("flexible") : type === "specific_days" ? t("specificDays") : t("dailyCount");
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onChange(type)}
+              className={`flex-1 flex flex-col items-center py-2 rounded-xl border text-xs transition ${
+                value === type
+                  ? "border-[#7C9082] bg-[#7C9082]/10 text-[#2D3B35]"
+                  : "border-slate-200 text-slate-400 hover:border-[#7C9082]"
+              }`}
+            >
+              <span className="text-base">{icon}</span>
+              <span className="text-[10px] mt-0.5 text-center leading-tight">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-slate-400 mt-1.5 text-center">{selectedDesc}</p>
+    </div>
+  );
+}
+
+// ─── Day of week picker ───────────────────────────────────────────────────────
+
+function DayPicker({ value, onChange }: { value: number[]; onChange: (days: number[]) => void }) {
+  const t = useTranslations("habits");
+  const days = [1, 2, 3, 4, 5, 6, 7];
+
+  function toggle(d: number) {
+    onChange(value.includes(d) ? value.filter(x => x !== d) : [...value, d].sort());
+  }
+
+  return (
+    <div>
+      <p className="text-xs text-slate-500 mb-2">{t("schedule.specificDaysDesc")}</p>
+      <div className="flex gap-1.5">
+        {days.map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => toggle(d)}
+            className={`flex-1 py-2 rounded-lg text-xs border transition ${
+              value.includes(d)
+                ? "bg-[#7C9082] text-white border-[#7C9082]"
+                : "border-slate-200 text-slate-500 hover:border-[#7C9082]"
+            }`}
+          >{t(`days.${d}`)}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Times per week picker (flexible) ────────────────────────────────────────
 
 function TargetPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const t = useTranslations("habits.targetPicker");
@@ -404,6 +628,31 @@ function TargetPicker({ value, onChange }: { value: number; onChange: (n: number
   );
 }
 
+// ─── Times per day counter (daily_count) ─────────────────────────────────────
+
+function TimesPerDayPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const t = useTranslations("habits.timesPerDay");
+  return (
+    <div>
+      <p className="text-xs text-slate-500 mb-2">{t("label")}</p>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(1, value - 1))}
+          className="w-8 h-8 rounded-full border border-slate-200 text-slate-500 hover:border-[#7C9082] hover:text-[#7C9082] transition text-sm"
+        >−</button>
+        <span className="text-lg font-light text-[#2D3B35] w-8 text-center">{value}</span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(20, value + 1))}
+          className="w-8 h-8 rounded-full border border-slate-200 text-slate-500 hover:border-[#7C9082] hover:text-[#7C9082] transition text-sm"
+        >+</button>
+        <span className="text-xs text-slate-400">{t("display", { count: value })}</span>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HabitsPage() {
@@ -413,10 +662,15 @@ export default function HabitsPage() {
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newName, setNewName] = useState("");
-  const [newTarget, setNewTarget] = useState(7);
-  const [adding, setAdding] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  // Form state
+  const [newName, setNewName] = useState("");
+  const [scheduleType, setScheduleType] = useState<ScheduleType>("flexible");
+  const [newTarget, setNewTarget] = useState(7);
+  const [newDays, setNewDays] = useState<number[]>([]);
+  const [newTimesPerDay, setNewTimesPerDay] = useState(1);
 
   useEffect(() => {
     fetch("/api/habits")
@@ -426,31 +680,75 @@ export default function HabitsPage() {
   }, []);
 
   async function handleToggle(habit: Habit) {
+    const willComplete = !habit.completed;
     setHabits((prev) => prev.map((h) => h.id === habit.id
-      ? { ...h, completed: !h.completed, week_count: h.week_count + (h.completed ? -1 : 1) }
+      ? { ...h, completed: willComplete, week_count: Math.max(0, h.week_count + (willComplete ? 1 : -1)) }
       : h
     ));
     const res = await fetch(`/api/habits/${habit.id}`, { method: "POST" });
     if (!res.ok) setHabits((prev) => prev.map((h) => h.id === habit.id ? habit : h));
   }
 
+  async function handleDailyCount(id: string, action: "increment" | "decrement") {
+    const habit = habits.find(h => h.id === id);
+    if (!habit) return;
+
+    const newCount = action === "increment"
+      ? habit.today_count + 1
+      : Math.max(0, habit.today_count - 1);
+    const newCompleted = newCount >= habit.times_per_day;
+    const wasCompleted = habit.completed;
+
+    setHabits((prev) => prev.map((h) => h.id === id
+      ? {
+          ...h,
+          today_count: newCount,
+          completed: newCompleted,
+          week_count: h.week_count + (!wasCompleted && newCompleted ? 1 : wasCompleted && !newCompleted ? -1 : 0),
+        }
+      : h
+    ));
+
+    await fetch(`/api/habits/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+  }
+
   async function handleAdd(e: { preventDefault(): void }) {
     e.preventDefault();
     if (!newName.trim()) return;
+    if (scheduleType === "specific_days" && newDays.length === 0) return;
     setAdding(true);
+
     const res = await fetch("/api/habits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName, target_per_week: newTarget }),
+      body: JSON.stringify({
+        name: newName,
+        schedule_type: scheduleType,
+        target_per_week: newTarget,
+        scheduled_days: scheduleType === "specific_days" ? newDays : undefined,
+        times_per_day: scheduleType === "daily_count" ? newTimesPerDay : undefined,
+      }),
     });
+
     if (res.ok) {
       const habit = await res.json();
       setHabits((prev) => [...prev, habit]);
-      setNewName("");
-      setNewTarget(7);
-      setShowForm(false);
+      resetForm();
     }
     setAdding(false);
+  }
+
+  function resetForm() {
+    setNewName("");
+    setScheduleType("flexible");
+    setNewTarget(7);
+    setNewDays([]);
+    setNewTimesPerDay(1);
+    setShowForm(false);
   }
 
   async function handleDelete(id: string) {
@@ -467,6 +765,9 @@ export default function HabitsPage() {
   }
 
   const completedCount = habits.filter((h) => h.completed).length;
+
+  const canSubmit = newName.trim() &&
+    (scheduleType !== "specific_days" || newDays.length > 0);
 
   return (
     <main className="flex flex-col items-center px-4 py-12 flex-1">
@@ -485,13 +786,14 @@ export default function HabitsPage() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
           </div>
-        ) : habits.length === 0 ? null : (
+        ) : habits.length > 0 ? (
           <div className="space-y-3">
             {habits.map((h) => (
               <HabitRow
                 key={h.id}
                 habit={h}
                 onToggle={handleToggle}
+                onDailyCount={handleDailyCount}
                 onDelete={handleDelete}
                 onCommitmentChange={handleCommitmentChange}
                 onWeekCountChange={handleWeekCountChange}
@@ -499,7 +801,7 @@ export default function HabitsPage() {
               />
             ))}
           </div>
-        )}
+        ) : null}
 
         {showForm ? (
           <form onSubmit={handleAdd} className="space-y-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
@@ -509,21 +811,38 @@ export default function HabitsPage() {
               onChange={(e) => setNewName(e.target.value)}
               placeholder={t("addForm.placeholder")}
               autoFocus
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#3E4A3D]
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-[#FDFCF8] text-[#2D3B35]
                          placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#7C9082] transition"
             />
-            <TargetPicker value={newTarget} onChange={setNewTarget} />
+
+            <SchedulePicker value={scheduleType} onChange={setScheduleType} />
+
+            {scheduleType === "flexible" && (
+              <TargetPicker value={newTarget} onChange={setNewTarget} />
+            )}
+            {scheduleType === "specific_days" && (
+              <DayPicker value={newDays} onChange={setNewDays} />
+            )}
+            {scheduleType === "daily_count" && (
+              <TimesPerDayPicker value={newTimesPerDay} onChange={setNewTimesPerDay} />
+            )}
+
             <div className="flex gap-2">
-              <button type="submit" disabled={adding || !newName.trim()}
+              <button
+                type="submit"
+                disabled={adding || !canSubmit}
                 className="flex-1 bg-[#7C9082] text-white py-2 rounded-lg text-sm hover:bg-[#6A7C70] disabled:opacity-50 transition"
               >{adding ? t("addForm.saving") : t("addForm.addButton")}</button>
-              <button type="button" onClick={() => { setShowForm(false); setNewName(""); setNewTarget(7); }}
+              <button
+                type="button"
+                onClick={resetForm}
                 className="px-4 py-2 rounded-lg text-sm border border-slate-200 text-slate-500 hover:border-slate-300 transition"
               >{t("addForm.cancelButton")}</button>
             </div>
           </form>
         ) : (
-          <button onClick={() => setShowForm(true)}
+          <button
+            onClick={() => setShowForm(true)}
             className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-slate-400 text-sm
                        hover:border-[#7C9082] hover:text-[#7C9082] transition"
           >{t("addHabitTrigger")}</button>
