@@ -6,6 +6,7 @@
     "journal": "Journal",
     "habits": "Habits",
     "thoughtRecords": "Thoughts",
+    "affirmations": "Affirmations",
     "portal": "Portal",
     "signOut": "Sign out"
   },
@@ -213,6 +214,40 @@
     },
     "journalBlocked": "Patient hasn't shared journal entries.",
     "noData": "No data yet."
+  },
+  "affirmations": {
+    "title": "My Affirmations",
+    "addButton": "Add affirmation",
+    "todayCard": "Today's affirmation",
+    "noAffirmations": "No affirmations yet.",
+    "noAffirmationsHint": "Add one below or let the AI coach help you write one.",
+    "aiCoachTitle": "Need help writing one?",
+    "valueLabel": "What area of life?",
+    "contextLabel": "Optional — what's on your mind?",
+    "contextPlaceholder": "e.g. I struggle with self-doubt at work",
+    "generateButton": "Generate affirmation",
+    "generatingButton": "Writing…",
+    "saveButton": "Save this",
+    "savingButton": "Saving…",
+    "tryAgainButton": "Try another",
+    "frequencyLabel": "Remind me",
+    "frequencies": {
+      "daily": "Every day",
+      "weekdays": "Weekdays",
+      "weekends": "Weekends"
+    },
+    "enableNotifications": "Enable notifications",
+    "notificationsEnabled": "Notifications on ✓",
+    "deleteConfirm": "Delete this affirmation?",
+    "categories": {
+      "creativity": "Creativity",
+      "family": "Family",
+      "career": "Career",
+      "humor": "Humor",
+      "freedom": "Freedom",
+      "spiritual": "Spiritual",
+      "other": "Other"
+    }
   },
   "checkin": {
     "title": "How are you feeling?",

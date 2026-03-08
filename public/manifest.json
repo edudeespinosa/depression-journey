@@ -1,0 +1,13 @@
+{
+  "name": "Phantom Prophet",
+  "short_name": "Phantom",
+  "description": "A gentle companion for your mental health journey.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFCF8",
+  "theme_color": "#7C9082",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

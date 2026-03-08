@@ -22,6 +22,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Phantom Prophet",
   description: "A gentle companion for your journey, at your pace.",
+  manifest: "/manifest.json",
 };
 
 type Props = {
@@ -40,6 +41,17 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('[SW] registered, scope:', reg.scope))
+                .catch(err => console.error('[SW] registration failed:', err));
+            });
+          }
+        `}} />
+      </head>
       <body className={`${dmSans.variable} ${playfair.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}

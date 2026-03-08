@@ -6,6 +6,7 @@
     "journal": "Diario",
     "habits": "Hábitos",
     "thoughtRecords": "Pensamientos",
+    "affirmations": "Afirmaciones",
     "portal": "Portal",
     "signOut": "Cerrar sesión"
   },
@@ -213,6 +214,40 @@
     },
     "journalBlocked": "El paciente no ha compartido entradas del diario.",
     "noData": "Sin datos aún."
+  },
+  "affirmations": {
+    "title": "Mis Afirmaciones",
+    "addButton": "Agregar afirmación",
+    "todayCard": "Afirmación de hoy",
+    "noAffirmations": "Aún no hay afirmaciones.",
+    "noAffirmationsHint": "Agrega una abajo o deja que el coach de IA te ayude a escribir una.",
+    "aiCoachTitle": "¿Necesitas ayuda para escribir una?",
+    "valueLabel": "¿Qué área de tu vida?",
+    "contextLabel": "Opcional — ¿qué tienes en mente?",
+    "contextPlaceholder": "ej. Me cuesta la autoduda en el trabajo",
+    "generateButton": "Generar afirmación",
+    "generatingButton": "Escribiendo…",
+    "saveButton": "Guardar esta",
+    "savingButton": "Guardando…",
+    "tryAgainButton": "Intentar otra",
+    "frequencyLabel": "Recuérdame",
+    "frequencies": {
+      "daily": "Cada día",
+      "weekdays": "Entre semana",
+      "weekends": "Fines de semana"
+    },
+    "enableNotifications": "Activar notificaciones",
+    "notificationsEnabled": "Notificaciones activas ✓",
+    "deleteConfirm": "¿Eliminar esta afirmación?",
+    "categories": {
+      "creativity": "Creatividad",
+      "family": "Familia",
+      "career": "Carrera",
+      "humor": "Humor",
+      "freedom": "Libertad",
+      "spiritual": "Espiritual",
+      "other": "Otro"
+    }
   },
   "checkin": {
     "title": "¿Cómo te sientes?",

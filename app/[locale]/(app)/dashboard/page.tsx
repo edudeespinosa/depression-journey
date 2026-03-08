@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
+import AffirmationBanner from "@/components/AffirmationBanner";
 
 type Checkin = { emotion: string; intensity: number; created_at: string };
 type Habit   = { id: string; completed: boolean; week_count: number; target_per_week: number };
@@ -264,6 +265,9 @@ export default function DashboardPage() {
               </Card>
             </Link>
           )}
+
+          {/* ── Affirmation banner ───────────────────────────────────────── */}
+          <AffirmationBanner />
 
           {/* ── Stats row ────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 gap-4">
