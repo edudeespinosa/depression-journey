@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -57,11 +58,9 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#FDFCF8] flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
 
-        <div className="text-center">
-          <h1 className="text-3xl font-light tracking-tight text-[#3E4A3D]">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
+        <div className="text-center flex flex-col items-center">
+          <Image src="/logo.png" alt="Phantom Prophet" width={832} height={1248} className="w-32 h-auto mb-2" priority unoptimized />
+          <p className="mt-1 text-sm text-slate-400">
             {mode === "signin" ? t("subtitleSignin") : t("subtitleForgot")}
           </p>
         </div>

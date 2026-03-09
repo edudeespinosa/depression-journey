@@ -24,7 +24,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/favicon.ico" ||
     pathname === "/sw.js" ||
     pathname === "/manifest.json" ||
-    pathname.startsWith("/icon-")
+    pathname.startsWith("/icon-") ||
+    pathname.startsWith("/logo")
   ) {
     return NextResponse.next();
   }

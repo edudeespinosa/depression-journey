@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   title: "Phantom Prophet",
   description: "A gentle companion for your journey, at your pace.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
+  },
 };
 
 type Props = {
