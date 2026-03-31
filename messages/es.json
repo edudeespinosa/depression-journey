@@ -7,6 +7,7 @@
     "habits": "Hábitos",
     "thoughtRecords": "Pensamientos",
     "affirmations": "Afirmaciones",
+    "art": "Arte",
     "portal": "Portal",
     "signOut": "Cerrar sesión"
   },
@@ -248,6 +249,30 @@
       "spiritual": "Espiritual",
       "other": "Otro"
     }
+  },
+  "art": {
+    "title": "Arte Terapia",
+    "subtitle": "Comparte lo que has creado — explorémoslo juntos.",
+    "newSession": "Nueva sesión",
+    "newTitle": "Nueva Sesión de Arte",
+    "newSubtitle": "Sube algo que hayas creado y comparte lo que significa para ti.",
+    "uploadLabel": "Obra de arte (opcional)",
+    "uploadHint": "Foto, dibujo, pintura — cualquier cosa que hayas hecho",
+    "uploadButton": "Elegir imagen",
+    "noteLabel": "Cuéntame sobre esto",
+    "notePlaceholder": "¿Qué significa esto para ti? ¿Cómo te sentiste al crearlo? Cualquier cosa…",
+    "startButton": "Comenzar a explorar",
+    "startingButton": "Iniciando…",
+    "noSessions": "Sin sesiones aún.",
+    "noSessionsHint": "Inicia tu primera sesión de arte terapia.",
+    "replyPlaceholder": "Comparte lo que surge para ti…",
+    "sendButton": "Enviar",
+    "backLink": "← Todas las sesiones",
+    "errorMessage": "Algo salió mal. Por favor intenta de nuevo.",
+    "imageSectionLabel": "Tu obra",
+    "portalTitle": "Sesiones de Arte",
+    "portalEmpty": "Sin sesiones de arte compartidas aún.",
+    "portalBlocked": "El paciente no ha compartido sesiones de arte."
   },
   "checkin": {
     "title": "¿Cómo te sientes?",

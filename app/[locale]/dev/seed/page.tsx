@@ -9,7 +9,7 @@ type Status = "idle" | "seeding" | "clearing" | "done" | "cleared" | "error";
 export default function DevSeedPage() {
   const locale = useLocale();
   const [status, setStatus] = useState<Status>("idle");
-  const [result, setResult] = useState<{ checkins: number; habits: number; logs: number } | null>(null);
+  const [result, setResult] = useState<{ checkins: number; habits: number; logs: number; journals: number; thoughts: number; artSessions: number } | null>(null);
   const [error, setError] = useState("");
 
   async function handleSeed() {
@@ -58,7 +58,7 @@ export default function DevSeedPage() {
           <p className="text-xs uppercase tracking-widest text-slate-400 mb-2">Developer tool</p>
           <h1 className="text-2xl font-light tracking-tight">Seed Demo Data</h1>
           <p className="mt-2 text-slate-500 text-sm">
-            Inserts 31 check-ins (30-day arc) + 4 habits with logs into your account.
+            Inserts 31 check-ins, 4 habits, 7 journal entries, 3 thought records, and 2 art sessions into your account.
           </p>
         </div>
 
@@ -91,6 +91,9 @@ export default function DevSeedPage() {
               <p className="text-sm text-[#3E4A3D]">✓ {result.checkins} check-ins inserted</p>
               <p className="text-sm text-[#3E4A3D]">✓ {result.habits} habits inserted</p>
               <p className="text-sm text-[#3E4A3D]">✓ {result.logs} habit log entries inserted</p>
+              <p className="text-sm text-[#3E4A3D]">✓ {result.journals} journal entries inserted</p>
+              <p className="text-sm text-[#3E4A3D]">✓ {result.thoughts} thought records inserted</p>
+              <p className="text-sm text-[#3E4A3D]">✓ {result.artSessions} art sessions inserted</p>
             </div>
             <Link
               href={`/${locale}/dashboard`}
