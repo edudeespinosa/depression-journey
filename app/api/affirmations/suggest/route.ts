@@ -45,7 +45,7 @@ Write ONE self-affirmation following these research-backed principles:
       messages: [{ role: "user", content: userMessage }],
     });
   } catch (err) {
-    return new Response(String(err), { status: 502 });
+    return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
   const readable = new ReadableStream({

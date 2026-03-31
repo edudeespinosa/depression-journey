@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
   } catch (err) {
     console.error("[art/chat] Anthropic error:", err);
-    return new Response(String(err), { status: 502 });
+    return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
   const readable = new ReadableStream({

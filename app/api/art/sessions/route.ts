@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[art/sessions] Anthropic error:", err);
-    return new Response(String(err), { status: 502 });
+    return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
   const readable = new ReadableStream({

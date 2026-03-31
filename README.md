@@ -71,7 +71,7 @@ Therapists can access a shared portal to view patient progress between sessions,
 <!-- screenshot: /art and /art/[id] -->
 ![art-session-new](screenshots/art-session-new.png)
 ![art-session-history](screenshots/art-session-history.png)
-![art--detail](screenshots/art--detail.png)
+![art-session-detail](screenshots/art-session-detail.png)
 
 &nbsp;
 
