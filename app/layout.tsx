@@ -1,8 +1,4 @@
-// Root layout — <html> lang is set properly by app/[locale]/layout.tsx
+// Root layout — shell is owned by app/[locale]/layout.tsx which sets lang and fonts
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html>
-      <body>{children}</body>
-    </html>
-  );
+  return children;
 }

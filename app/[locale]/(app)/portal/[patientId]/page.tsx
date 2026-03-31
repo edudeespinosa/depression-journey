@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
@@ -30,6 +31,8 @@ type Habit = {
   completed: boolean;
 };
 type JournalEntry = { id: string; content: string; mood: string; created_at: string };
+type ArtMessage = { id: string; role: "user" | "assistant"; content: string; created_at: string };
+type ArtSession = { id: string; image_url: string | null; initial_note: string; created_at: string; messages: ArtMessage[] };
 type Permissions = {
   share_emotions: boolean;
   share_thought_records: boolean;
@@ -45,7 +48,7 @@ type PatientData = {
   permissions: Permissions;
 };
 
-type Tab = "emotions" | "thoughts" | "habits" | "journal";
+type Tab = "emotions" | "thoughts" | "habits" | "journal" | "art";
 
 // ─── Color helpers (matching dashboard) ───────────────────────────────────────
 const CATEGORY_COLOR: Record<string, string> = {
@@ -282,21 +285,31 @@ export default function PatientDetailPage({ params }: { params: Promise<{ patien
   const t = useTranslations("portal");
 
   const [data, setData] = useState<PatientData | null>(null);
+  const [artSessions, setArtSessions] = useState<ArtSession[]>([]);
+  const [artBlocked, setArtBlocked] = useState(false);
+  const [expandedArtSession, setExpandedArtSession] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("emotions");
 
   useEffect(() => {
-    fetch(`/api/therapist/patients/${patientId}`)
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/therapist/patients/${patientId}`).then((r) => r.json()),
+      fetch(`/api/therapist/patients/${patientId}/art`).then((r) => r.json()),
+    ]).then(([patientData, artData]) => {
+      if (patientData && !patientData.error) setData(patientData);
+      if (artData?.blocked) setArtBlocked(true);
+      else if (Array.isArray(artData)) setArtSessions(artData);
+    }).finally(() => setLoading(false));
   }, [patientId]);
 
-  const TABS: { id: Tab; label: string; visible: boolean }[] = [
-    { id: "emotions", label: t("tabs.emotions"), visible: data?.permissions.share_emotions ?? true },
-    { id: "thoughts", label: t("tabs.thoughts"), visible: data?.permissions.share_thought_records ?? true },
-    { id: "habits",   label: t("tabs.habits"),   visible: data?.permissions.share_habits ?? true },
-    { id: "journal",  label: t("tabs.journal"),  visible: true },
+  const tArt = useTranslations("art");
+
+  const TABS: { id: Tab; label: string }[] = [
+    { id: "emotions", label: t("tabs.emotions") },
+    { id: "thoughts", label: t("tabs.thoughts") },
+    { id: "habits",   label: t("tabs.habits")   },
+    { id: "journal",  label: t("tabs.journal")  },
+    { id: "art",      label: tArt("portalTitle") },
   ];
 
   if (loading) {
@@ -336,12 +349,12 @@ export default function PatientDetailPage({ params }: { params: Promise<{ patien
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-white text-[#2D3B35] shadow-sm"
                   : "text-slate-400 hover:text-slate-600"
@@ -408,6 +421,80 @@ export default function PatientDetailPage({ params }: { params: Promise<{ patien
               <p className="text-sm text-slate-400 text-center py-8">{t("noData")}</p>
             ) : (
               data.journal_entries.map((e) => <JournalCard key={e.id} entry={e} />)
+            )}
+          </div>
+        )}
+
+        {activeTab === "art" && (
+          <div className="space-y-4">
+            {artBlocked ? (
+              <div className="bg-white border border-slate-100 rounded-2xl p-8 text-center">
+                <p className="text-sm text-slate-400">{tArt("portalBlocked")}</p>
+              </div>
+            ) : artSessions.length === 0 ? (
+              <p className="text-sm text-slate-400 text-center py-8">{tArt("portalEmpty")}</p>
+            ) : (
+              artSessions.map((s) => (
+                <div key={s.id} className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+                  <button
+                    className="w-full flex items-center gap-4 p-4 text-left hover:bg-slate-50 transition"
+                    onClick={() => setExpandedArtSession(expandedArtSession === s.id ? null : s.id)}
+                  >
+                    <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: "#F0EDE6" }}>
+                      {s.image_url ? (
+                        <Image src={s.image_url} alt="" width={56} height={56} className="w-full h-full object-cover" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA89E" strokeWidth="1.5">
+                            <circle cx="13.5" cy="6.5" r="1" fill="#9AA89E" stroke="none" />
+                            <circle cx="17.5" cy="10.5" r="1" fill="#9AA89E" stroke="none" />
+                            <circle cx="8.5" cy="7.5" r="1" fill="#9AA89E" stroke="none" />
+                            <circle cx="6.5" cy="12.5" r="1" fill="#9AA89E" stroke="none" />
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</p>
+                      <p className="text-sm text-[#3E4A3D] font-medium truncate mt-0.5">{s.initial_note}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{s.messages.length} messages</p>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA89E" strokeWidth="2"
+                      className="flex-shrink-0 transition-transform"
+                      style={{ transform: expandedArtSession === s.id ? "rotate(180deg)" : "rotate(0deg)" }}>
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  {expandedArtSession === s.id && (
+                    <div className="border-t border-slate-100 px-4 py-4 space-y-3" style={{ background: "#FDFCF8" }}>
+                      {s.image_url && (
+                        <div className="rounded-xl overflow-hidden border border-slate-100">
+                          <Image src={s.image_url} alt="" width={600} height={400} className="w-full object-contain" style={{ maxHeight: "280px" }} unoptimized />
+                        </div>
+                      )}
+                      <div className="flex justify-end">
+                        <div className="max-w-[80%] px-3 py-2 rounded-2xl rounded-tr-sm text-sm leading-relaxed" style={{ background: "#E2E8E3", color: "#3E4A3D" }}>
+                          {s.initial_note}
+                        </div>
+                      </div>
+                      {s.messages.map((m) => (
+                        <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                          <div
+                            className="max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
+                            style={m.role === "user"
+                              ? { background: "#E2E8E3", color: "#3E4A3D", borderTopRightRadius: "4px" }
+                              : { background: "#fff", color: "#2D3B35", border: "1px solid #d5e8dc", borderTopLeftRadius: "4px" }}
+                          >
+                            {m.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
             )}
           </div>
         )}
