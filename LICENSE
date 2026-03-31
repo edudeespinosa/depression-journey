@@ -1,0 +1,112 @@
+
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                            Version 3, 19 November 2007
+                    
+    Copyright (C) 2007 Free Software Foundation, Inc. 
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+    Everyone is permitted to copy and distribute verbatim copies
+    of this license document, but changing it is not allowed.
+                    
+           Preamble
+            
+    The GNU Affero General Public License is a free software license that
+    guarantees end users the freedom to run, study, share and change the
+    software. It also requires that any modified versions of the software
+    be made available to the community under the same terms.
+                    
+    This version of the license incorporates some of the features of the
+    GNU General Public License (GPL), but adds a key requirement to ensure
+    that users have the ability to interact with the software over a network
+    and receive the source code. Hence, the Affero license is particularly
+    suitable for software that is used for web applications.
+                    
+           TERMS AND CONDITIONS
+                    
+    0. Definitions.
+                    
+    "This License" refers to version 3 of the GNU Affero General Public License.
+                    
+    "Copyright" also means copyright-like laws that apply to other kinds
+    of works, such as semiconductor masks. 
+                    
+    "The Program" refers to the work licensed under this License.
+                    
+    "You" is you, if you are reading this text. "Your" is you, if you are
+    doing the things that this License permits you to do. 
+                    
+    "Source code" for a work means the preferred form of the work for making
+    modifications to it. "Object code" means any non source form of a work.
+                    
+    "Propagation" is any activity that uses, copies, modifies, links with,
+    or interacts with the Program in a way that would make you, in the absence
+    of this License, liable for copyright infringement.
+                    
+    1. Source Code.
+                    
+    The Program must be made available in source code form. You may not
+    impose any further restrictions on the rights granted by this License.
+                    
+    2. Modified Source Code.
+                    
+    You must make available the source code of all modified versions of the
+    Program, under the same terms as this License when you distribute those
+    modified versions.
+                    
+    3. Network Use.
+                    
+    The source code for the Program must always be made available. If the
+    Program is run on a server or through a network, you must also provide a
+    means for users to obtain the source code of the running version under the
+    same terms as the original license.
+                    
+    4. Personal Use.
+                    
+    You may use the Program and modify it for personal use without exclusion.
+                    
+    5. Attribution.
+                    
+    If you distribute the Program, you must give proper credit to the authors and
+your obligations under the terms of this License.
+                    
+    6. Warranty Disclaimer.
+                    
+    There is no warranty for the Program, and it is provided "as is".
+                    
+    7. Limitation of Liability.
+                    
+    In no event shall the authors be liable for any damages arising from the
+    use or inability to use the Program.
+                    
+    8. Acceptance.
+                    
+    By using or distributing the Program, you accept the terms of this License.
+                    
+    9. Termination.
+                    
+    If you breach the terms of this License, it will terminate your rights
+    to use the Program.
+                    
+    10. Your Rights.
+                    
+    Your rights under this License are not restricted by any other license.
+                    
+    11. Future Versions.
+                    
+    The Free Software Foundation may publish new versions of the GNU Affero General
+    Public License from time to time. You can always find a copy of the latest
+    version at http://www.gnu.org/licenses/agpl-3.0.html.
+                    
+    12. No Warranty.
+                    
+    There is no warranty for the Program,
+    and it is provided "as is". 
+                    
+    13. Disclaimer of Liability.
+                    
+    In no event shall the authors or copyright holders be liable for any
+    damages arising from the use or inability to use the Program. 
+                    
+    14. Accepting the License.
+                    
+    By using, copying, or modifying the Program, you accept the terms of this License.
+
