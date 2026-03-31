@@ -12,3 +12,8 @@ if ! echo "$branch" | grep -qE '^[^/]+/(feat|update|fix|issue)/[^/]+$'; then
   echo "Example: iakor/feat/add-login-page"
   exit 1
 fi
+
+# Remind developers on feat branches to run the security audit before merging
+if echo "$branch" | grep -qE '^[^/]+/feat/[^/]+$'; then
+  echo "[bounty] This is a feat branch. Run the security-bounty-check agent before merging."
+fi
