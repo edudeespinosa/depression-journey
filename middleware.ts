@@ -33,8 +33,17 @@ export async function middleware(request: NextRequest) {
   // Run next-intl middleware first (locale detection + redirect)
   const intlResponse = intlMiddleware(request);
 
-  // Let locale redirects pass through immediately (e.g., / → /en/)
+  // Let locale redirects pass through, but reconstruct the URL using
+  // forwarded headers so the Location doesn't contain the internal port (3000).
   if (intlResponse.status === 307 || intlResponse.status === 308) {
+    const location = intlResponse.headers.get('location');
+    if (location) {
+      const locUrl = new URL(location);
+      const proto = request.headers.get('x-forwarded-proto') ?? locUrl.protocol.replace(':', '');
+      const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? locUrl.hostname;
+      const fixedUrl = `${proto}://${host}${locUrl.pathname}${locUrl.search}${locUrl.hash}`;
+      return NextResponse.redirect(fixedUrl, { status: intlResponse.status });
+    }
     return intlResponse;
   }
 
