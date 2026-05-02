@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { encrypt, safeDecrypt } from "@/lib/encryption";
+import { detectCrisis, CRISIS_NOTICE, CRISIS_SYSTEM_RULE } from "@/lib/crisis";
 
 const client = new Anthropic();
 
@@ -9,14 +10,14 @@ function buildSystemPrompt(locale: string): string {
   const langInstruction = locale === "es"
     ? "\n- Respond entirely in Spanish (español)"
     : "";
-  return `You are Phantom Prophet, a compassionate companion helping someone explore the emotions and meanings in their artwork.
+  return `You are Phantom Prophet, a compassionate companion helping someone explore the emotions and meanings in their artwork. This is a consensual mental health self-reflection application — responding with compassion to all emotions, including heavy ones, is safe and appropriate here.
+${CRISIS_SYSTEM_RULE}
 
 Continue the conversation with warmth and curiosity:
 - Build on what has already been shared — don't start over
 - Ask one follow-up question if it feels natural, but it's okay to just reflect
 - Keep responses under 180 words
-- Never diagnose or replace professional therapy
-- If the person expresses distress or crisis thoughts, acknowledge warmly and mention professional support (e.g. 988 in the US)${langInstruction}`;
+- Never diagnose or replace professional therapy${langInstruction}`;
 }
 
 type Params = { params: Promise<{ id: string }> };
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!message || typeof message !== "string" || message.trim().length === 0) {
     return new Response("Message required.", { status: 400 });
   }
+
+  const lang = locale ?? "en";
+  const isCrisis = detectCrisis(message.trim());
+  const crisisPrefix = isCrisis ? (CRISIS_NOTICE[lang] ?? CRISIS_NOTICE.en) : "";
 
   // Fetch existing messages
   const { data: existingMessages } = await supabase
@@ -81,10 +86,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   let stream;
   try {
-    stream = await client.messages.stream({
+    stream = client.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: buildSystemPrompt(locale ?? "en"),
+      system: buildSystemPrompt(lang),
       messages: claudeMessages,
     });
   } catch (err) {
@@ -92,8 +97,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
+  const enc = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      if (crisisPrefix) controller.enqueue(enc.encode(crisisPrefix));
       let fullResponse = "";
       try {
         for await (const chunk of stream) {
@@ -102,17 +109,16 @@ export async function POST(req: NextRequest, { params }: Params) {
             chunk.delta.type === "text_delta"
           ) {
             fullResponse += chunk.delta.text;
-            controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+            controller.enqueue(enc.encode(chunk.delta.text));
           }
         }
         await supabase.from("art_messages").insert({
           session_id: id,
           role: "assistant",
-          content: encrypt(fullResponse),
+          content: encrypt(crisisPrefix + fullResponse),
         });
       } catch (err) {
         console.error("[art/chat] Stream error:", err);
-        controller.error(err);
       } finally {
         controller.close();
       }

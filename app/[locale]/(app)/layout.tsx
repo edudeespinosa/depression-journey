@@ -5,7 +5,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-[#FDFCF8] text-[#2D3B35]">
       <Sidebar />
       {/* Desktop: offset by sidebar width. Mobile: pad top (header) + bottom (tabs). */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-[232px] pt-12 pb-14 lg:pt-0 lg:pb-0">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-[232px] pt-[72px] pb-14 lg:pt-0 lg:pb-0">
         {children}
       </div>
     </div>
