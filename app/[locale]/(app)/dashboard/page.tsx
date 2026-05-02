@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import AffirmationBanner from "@/components/AffirmationBanner";
+import AgentSuggestion from "@/components/AgentSuggestion";
 
 type Checkin = { emotion: string; intensity: number; created_at: string };
 type Habit   = { id: string; completed: boolean; week_count: number; target_per_week: number };
@@ -231,11 +232,16 @@ export default function DashboardPage() {
     <main className="flex flex-col px-6 py-8 flex-1 max-w-2xl mx-auto w-full">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="mb-8">
+      <div className="mb-6">
         <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">
           {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
         </p>
         <h1 className="text-2xl font-light text-[#2D3B35]">{greeting()}</h1>
+      </div>
+
+      {/* ── Agent suggestion ─────────────────────────────────────────────── */}
+      <div className="mb-4">
+        <AgentSuggestion />
       </div>
 
       {loading ? (
