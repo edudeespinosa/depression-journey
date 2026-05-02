@@ -190,6 +190,15 @@ export default function Sidebar() {
 
         {/* Bottom */}
         <div className="px-3 pb-5 pt-3" style={{ borderTop: "1px solid #E8E5DC" }}>
+          {/* Crisis line */}
+          <div className="px-3 py-2 mb-1 rounded-lg" style={{ background: "#F0EDE6" }}>
+            <p className="text-[10px] leading-snug" style={{ color: "#9AA89E" }}>
+              In crisis?{" "}
+              <a href="tel:988" className="underline font-medium" style={{ color: "#7C9082" }}>
+                Call or text 988
+              </a>
+            </p>
+          </div>
           <div className="px-3 py-1.5 mb-0.5">
             <LanguageSwitcher />
           </div>
@@ -216,23 +225,37 @@ export default function Sidebar() {
       </aside>
 
       {/* ── Mobile: top header ──────────────────────────────────────────── */}
-      <header className="flex lg:hidden fixed top-0 left-0 right-0 z-20 items-center justify-between px-4 h-12"
+      <header className="flex lg:hidden fixed top-0 left-0 right-0 z-20 flex-col"
         style={{ background: "#F5F4EF", borderBottom: "1px solid #E8E5DC" }}>
-        <div className="flex items-center gap-2">
-          <Image src="/logo-icon.png" alt="Phantom Prophet" width={400} height={400} className="w-7 h-7 object-contain" unoptimized />
-          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#3E4A3D", letterSpacing: "0.12em" }}>
-            Phantom Prophet
-          </span>
+        <div className="flex items-center justify-between px-4 h-12">
+          <div className="flex items-center gap-2">
+            <Image src="/logo-icon.png" alt="Phantom Prophet" width={400} height={400} className="w-7 h-7 object-contain" unoptimized />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#3E4A3D", letterSpacing: "0.12em" }}>
+              Phantom Prophet
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher />
+            <button
+              onClick={handleSignOut}
+              className="text-xs px-2 py-1.5 rounded-lg transition"
+              style={{ color: "#9AA89E" }}
+            >
+              {t("signOut")}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <LanguageSwitcher />
-          <button
-            onClick={handleSignOut}
-            className="text-xs px-2 py-1.5 rounded-lg transition"
-            style={{ color: "#9AA89E" }}
-          >
-            {t("signOut")}
-          </button>
+        <div className="px-4 py-1 text-center" style={{ background: "#EAE8E1", borderTop: "1px solid #E8E5DC" }}>
+          <p className="text-[10px]" style={{ color: "#9AA89E" }}>
+            In crisis?{" "}
+            <a href="tel:988" className="underline font-medium" style={{ color: "#7C9082" }}>
+              Call or text 988
+            </a>
+            {" · "}
+            <a href="sms:741741?body=HOME" className="underline font-medium" style={{ color: "#7C9082" }}>
+              Text HOME to 741741
+            </a>
+          </p>
         </div>
       </header>
 

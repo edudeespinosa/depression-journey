@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/encryption";
+import { detectCrisis, CRISIS_NOTICE, CRISIS_SYSTEM_RULE } from "@/lib/crisis";
 
 const client = new Anthropic();
 
@@ -9,15 +10,14 @@ function buildSystemPrompt(locale: string): string {
   const langInstruction = locale === "es"
     ? "\n- Respond entirely in Spanish (español)"
     : "";
-  return `You are a gentle, warm mental health companion named Phantom Prophet.
-Your role is to help users reflect on their emotions and experiences with compassion and curiosity — never judgment.
+  return `You are a gentle, warm mental health companion named Phantom Prophet. This is a consensual mental health self-reflection application — responding with compassion to all emotions, including heavy ones, is safe and appropriate here.
+${CRISIS_SYSTEM_RULE}
 
 Guidelines:
 - Acknowledge what the user has shared before offering any reflection
 - Ask one thoughtful open-ended question to help them explore deeper, at the end
 - Keep your response under 200 words — brevity feels safer
 - Never diagnose, prescribe, or replace professional therapy
-- If the user expresses crisis or self-harm, gently direct them to a crisis line (e.g., 988 in the US)
 - Use a calm, conversational tone — not clinical, not overly cheerful${langInstruction}`;
 }
 
@@ -36,13 +36,17 @@ export async function POST(req: NextRequest) {
   }
 
   const validMood: Mood | null = VALID_MOODS.includes(mood) ? mood : null;
+  const lang = locale ?? "en";
+
+  const isCrisis = detectCrisis(entry.trim());
+  const crisisPrefix = isCrisis ? (CRISIS_NOTICE[lang] ?? CRISIS_NOTICE.en) : "";
 
   let stream;
   try {
-    stream = await client.messages.stream({
+    stream = client.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: buildSystemPrompt(locale ?? "en"),
+      system: buildSystemPrompt(lang),
       messages: [{ role: "user", content: entry.trim() }],
     });
   } catch (err) {
@@ -50,8 +54,10 @@ export async function POST(req: NextRequest) {
     return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
+  const enc = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      if (crisisPrefix) controller.enqueue(enc.encode(crisisPrefix));
       let fullResponse = "";
       try {
         for await (const chunk of stream) {
@@ -60,19 +66,17 @@ export async function POST(req: NextRequest) {
             chunk.delta.type === "text_delta"
           ) {
             fullResponse += chunk.delta.text;
-            controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+            controller.enqueue(enc.encode(chunk.delta.text));
           }
         }
-        // Save to DB after stream completes successfully
         await supabase.from("journal_entries").insert({
           user_id: user.id,
           content: encrypt(entry.trim()),
-          ai_response: encrypt(fullResponse),
+          ai_response: encrypt(crisisPrefix + fullResponse),
           mood: validMood,
         });
       } catch (err) {
         console.error("[journal/reflect] Stream error:", err);
-        controller.error(err);
       } finally {
         controller.close();
       }

@@ -2,11 +2,13 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { encrypt, safeDecrypt } from "@/lib/encryption";
+import { detectCrisis, CRISIS_NOTICE, CRISIS_SYSTEM_RULE } from "@/lib/crisis";
 
 const client = new Anthropic();
 
 function buildCheckinPrompt(emotion: string, intensity: number, locale: string): string {
-  return `You are Phantom Prophet, a gentle Self-Reflection Guide.
+  return `You are Phantom Prophet, a gentle Self-Reflection Guide. This is a consensual mental health self-reflection application — responding with compassion to all emotions, including heavy ones, is safe and appropriate here.
+${CRISIS_SYSTEM_RULE}
 
 The user has checked in feeling "${emotion}" at ${intensity}% intensity.
 
@@ -18,7 +20,8 @@ Ask exactly ONE open-ended Socratic question to help them explore this feeling.
 }
 
 function buildFollowUpPrompt(emotion: string, intensity: number, locale: string): string {
-  return `You are Phantom Prophet, a gentle Self-Reflection Guide.
+  return `You are Phantom Prophet, a gentle Self-Reflection Guide. This is a consensual mental health self-reflection application — responding with compassion to all emotions, including heavy ones, is safe and appropriate here.
+${CRISIS_SYSTEM_RULE}
 
 The user checked in feeling "${emotion}" at ${intensity}% intensity. You are in a Socratic dialogue to help them explore this feeling.
 
@@ -63,17 +66,25 @@ export async function POST(req: NextRequest) {
     return new Response("Intensity must be 0–100.", { status: 400 });
   }
 
+  const lang = locale ?? "en";
   const isFollowUp = Array.isArray(conversationMessages) && conversationMessages.length > 0;
   const systemPrompt = isFollowUp
-    ? buildFollowUpPrompt(emotion, intensity, locale ?? "en")
-    : buildCheckinPrompt(emotion, intensity, locale ?? "en");
+    ? buildFollowUpPrompt(emotion, intensity, lang)
+    : buildCheckinPrompt(emotion, intensity, lang);
   const apiMessages = isFollowUp
     ? conversationMessages
     : [{ role: "user", content: `I'm feeling ${emotion} at ${intensity}% intensity.` }];
 
+  // Server-side crisis detection — scan emotion + last user message
+  const lastUserText = isFollowUp
+    ? (conversationMessages.findLast((m: { role: string; content: string }) => m.role === "user")?.content ?? "")
+    : emotion;
+  const isCrisis = detectCrisis(lastUserText);
+  const crisisPrefix = isCrisis ? (CRISIS_NOTICE[lang] ?? CRISIS_NOTICE.en) : "";
+
   let stream;
   try {
-    stream = await client.messages.stream({
+    stream = client.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 120,
       system: systemPrompt,
@@ -84,8 +95,10 @@ export async function POST(req: NextRequest) {
     return new Response("AI service temporarily unavailable.", { status: 502 });
   }
 
+  const enc = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      if (crisisPrefix) controller.enqueue(enc.encode(crisisPrefix));
       let fullResponse = "";
       try {
         for await (const chunk of stream) {
@@ -94,7 +107,7 @@ export async function POST(req: NextRequest) {
             chunk.delta.type === "text_delta"
           ) {
             fullResponse += chunk.delta.text;
-            controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+            controller.enqueue(enc.encode(chunk.delta.text));
           }
         }
         if (!isFollowUp) {
@@ -102,12 +115,11 @@ export async function POST(req: NextRequest) {
             user_id: user.id,
             emotion,
             intensity,
-            ai_response: encrypt(fullResponse),
+            ai_response: encrypt(crisisPrefix + fullResponse),
           });
         }
       } catch (err) {
         console.error("[checkin] Stream error:", err);
-        controller.error(err);
       } finally {
         controller.close();
       }
