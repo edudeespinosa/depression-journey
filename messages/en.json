@@ -9,7 +9,8 @@
     "affirmations": "Affirmations",
     "art": "Art",
     "portal": "Portal",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "settings": "Settings"
   },
   "dashboard": {
     "title": "Your Journey",
@@ -121,9 +122,18 @@
     },
     "commitment": {
       "label": "Commitment style",
-      "gentle": { "label": "Gentle", "description": "No pressure, just showing up" },
-      "steady": { "label": "Steady", "description": "Building momentum" },
-      "focused": { "label": "Focused", "description": "Staying accountable" }
+      "gentle": {
+        "label": "Gentle",
+        "description": "No pressure, just showing up"
+      },
+      "steady": {
+        "label": "Steady",
+        "description": "Building momentum"
+      },
+      "focused": {
+        "label": "Focused",
+        "description": "Staying accountable"
+      }
     },
     "targetPicker": {
       "label": "Times per week",
@@ -155,8 +165,19 @@
       "dailyCount": "Multiple times / day",
       "dailyCountDesc": "Track how many times you do it each day"
     },
-    "days": { "1": "Mo", "2": "Tu", "3": "We", "4": "Th", "5": "Fr", "6": "Sa", "7": "Su" },
-    "timesPerDay": { "label": "Times per day", "display": "{count}× per day" },
+    "days": {
+      "1": "Mo",
+      "2": "Tu",
+      "3": "We",
+      "4": "Th",
+      "5": "Fr",
+      "6": "Sa",
+      "7": "Su"
+    },
+    "timesPerDay": {
+      "label": "Times per day",
+      "display": "{count}× per day"
+    },
     "dailyProgress": "{count}/{target} today",
     "notScheduledToday": "Not scheduled today",
     "specificDaysProgress": "{done}/{total} scheduled days this week"
@@ -193,7 +214,10 @@
     "addAnotherButton": "Add another",
     "historyTitle": "Past records",
     "emptyHistory": "No records yet.",
-    "deleteConfirm": { "yes": "Yes", "no": "No" }
+    "deleteConfirm": {
+      "yes": "Yes",
+      "no": "No"
+    }
   },
   "portal": {
     "title": "Your Patients",
@@ -328,5 +352,15 @@
       "timid": "Timid",
       "surprised": "Surprised"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notifications",
+    "emailNudges": "Email check-in reminders",
+    "emailNudgesDesc": "Receive a gentle nudge when you haven't checked in for a couple of days.",
+    "saved": "Saved",
+    "saveError": "Could not save. Please try again.",
+    "account": "Account",
+    "email": "Email address"
   }
 }
