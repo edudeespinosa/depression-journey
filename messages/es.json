@@ -9,7 +9,8 @@
     "affirmations": "Afirmaciones",
     "art": "Arte",
     "portal": "Portal",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "settings": "Ajustes"
   },
   "dashboard": {
     "title": "Tu camino",
@@ -121,9 +122,18 @@
     },
     "commitment": {
       "label": "Estilo de compromiso",
-      "gentle": { "label": "Suave", "description": "Sin presión, solo apareciendo" },
-      "steady": { "label": "Constante", "description": "Construyendo impulso" },
-      "focused": { "label": "Enfocado", "description": "Manteniéndome responsable" }
+      "gentle": {
+        "label": "Suave",
+        "description": "Sin presión, solo apareciendo"
+      },
+      "steady": {
+        "label": "Constante",
+        "description": "Construyendo impulso"
+      },
+      "focused": {
+        "label": "Enfocado",
+        "description": "Manteniéndome responsable"
+      }
     },
     "targetPicker": {
       "label": "Veces por semana",
@@ -155,8 +165,19 @@
       "dailyCount": "Varias veces al día",
       "dailyCountDesc": "Registra cuántas veces lo haces cada día"
     },
-    "days": { "1": "Lu", "2": "Ma", "3": "Mi", "4": "Ju", "5": "Vi", "6": "Sá", "7": "Do" },
-    "timesPerDay": { "label": "Veces por día", "display": "{count}× por día" },
+    "days": {
+      "1": "Lu",
+      "2": "Ma",
+      "3": "Mi",
+      "4": "Ju",
+      "5": "Vi",
+      "6": "Sá",
+      "7": "Do"
+    },
+    "timesPerDay": {
+      "label": "Veces por día",
+      "display": "{count}× por día"
+    },
     "dailyProgress": "{count}/{target} hoy",
     "notScheduledToday": "No programado hoy",
     "specificDaysProgress": "{done}/{total} días programados esta semana"
@@ -193,7 +214,10 @@
     "addAnotherButton": "Agregar otro",
     "historyTitle": "Registros anteriores",
     "emptyHistory": "Sin registros aún.",
-    "deleteConfirm": { "yes": "Sí", "no": "No" }
+    "deleteConfirm": {
+      "yes": "Sí",
+      "no": "No"
+    }
   },
   "portal": {
     "title": "Tus Pacientes",
@@ -328,5 +352,15 @@
       "timid": "Tímido",
       "surprised": "Sorprendido"
     }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "notifications": "Notificaciones",
+    "emailNudges": "Recordatorios por correo",
+    "emailNudgesDesc": "Recibe un recordatorio amable cuando no hayas registrado tu estado de ánimo en un par de días.",
+    "saved": "Guardado",
+    "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+    "account": "Cuenta",
+    "email": "Correo electrónico"
   }
 }
