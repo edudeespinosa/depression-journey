@@ -36,23 +36,55 @@
     }
   },
   "landing": {
-    "headline": "Phantom Prophet",
-    "tagline": "Change is intimidating—especially when you're already fighting an uphill battle. A gentle companion for your journey, at your pace.",
-    "journalCard": {
-      "title": "Journal",
-      "subtitle": "Write & reflect with AI"
+    "nav": {
+      "ariaLabel": "Main navigation",
+      "signIn": "Sign in"
     },
-    "habitsCard": {
-      "title": "Habits",
-      "subtitle": "Small steps, your way"
+    "hero": {
+      "headline": "Your gentle companion for the journey inward.",
+      "tagline": "Change is intimidating — especially when you're already fighting an uphill battle. Phantom Prophet meets you where you are.",
+      "ctaSignup": "Get started, free",
+      "ctaSignin": "Sign in"
     },
-    "nourishCard": {
-      "title": "Nourish",
-      "subtitle": "Coming soon"
+    "features": {
+      "title": "Tools for your inner work",
+      "checkin": {
+        "title": "Daily Check-ins",
+        "body": "A quick moment each day to notice how you're feeling. Patterns emerge over time."
+      },
+      "journal": {
+        "title": "Guided Journal",
+        "body": "Write freely. Phantom Prophet reflects back, asks one question, and never judges."
+      },
+      "thoughts": {
+        "title": "Thought Records",
+        "body": "CBT-based tools to gently explore and challenge automatic negative thoughts."
+      },
+      "habits": {
+        "title": "Gentle Habits",
+        "body": "Build sustainable routines at your own pace — gentle, steady, or focused."
+      }
     },
-    "ctaJournal": "Open your journal",
-    "ctaHabits": "Check your habits",
-    "signIn": "Sign in"
+    "howItWorks": {
+      "title": "Simple by design",
+      "step1Label": "Create your account",
+      "step1Body": "Sign up in seconds with email or Google. No credit card, no commitment.",
+      "step2Label": "Build your daily practice",
+      "step2Body": "Check in daily, journal your thoughts, and track habits that matter to you.",
+      "step3Label": "See yourself grow",
+      "step3Body": "Review your patterns, reframe negative thoughts, and celebrate small wins."
+    },
+    "therapist": {
+      "title": "For mental health professionals",
+      "body": "Use Phantom Prophet alongside your patients. Monitor their mood, habits, and journal entries between sessions — with their permission.",
+      "emailCta": "Send us an email →",
+      "email": "edude.espinosa@gmail.com"
+    },
+    "finalCta": {
+      "headline": "Ready when you are.",
+      "body": "Your journey begins with one small step.",
+      "button": "Create your free account"
+    }
   },
   "login": {
     "title": "Phantom Prophet",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,11 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
 
   const supabase = createClient();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "signup") setMode("signup");
+  }, []);
 
   async function handleGoogleSignIn() {
     setLoading(true);

@@ -36,23 +36,55 @@
     }
   },
   "landing": {
-    "headline": "Phantom Prophet",
-    "tagline": "El cambio puede ser intimidante—especialmente cuando ya estás dando la batalla. Un compañero gentil para tu camino, a tu ritmo.",
-    "journalCard": {
-      "title": "Diario",
-      "subtitle": "Escribe y reflexiona con IA"
+    "nav": {
+      "ariaLabel": "Navegación principal",
+      "signIn": "Iniciar sesión"
     },
-    "habitsCard": {
-      "title": "Hábitos",
-      "subtitle": "Pequeños pasos, a tu manera"
+    "hero": {
+      "headline": "Tu compañero gentil para el camino interior.",
+      "tagline": "El cambio puede ser intimidante — especialmente cuando ya estás dando la batalla. Phantom Prophet te encuentra donde estás.",
+      "ctaSignup": "Empieza gratis",
+      "ctaSignin": "Iniciar sesión"
     },
-    "nourishCard": {
-      "title": "Nutrir",
-      "subtitle": "Próximamente"
+    "features": {
+      "title": "Herramientas para tu trabajo interior",
+      "checkin": {
+        "title": "Registros diarios",
+        "body": "Un momento rápido cada día para notar cómo te sientes. Los patrones emergen con el tiempo."
+      },
+      "journal": {
+        "title": "Diario guiado",
+        "body": "Escribe libremente. Phantom Prophet reflexiona contigo, hace una pregunta y nunca juzga."
+      },
+      "thoughts": {
+        "title": "Registros de pensamientos",
+        "body": "Herramientas basadas en TCC para explorar y desafiar suavemente los pensamientos negativos automáticos."
+      },
+      "habits": {
+        "title": "Hábitos gentiles",
+        "body": "Construye rutinas sostenibles a tu propio ritmo — gentil, estable o enfocado."
+      }
     },
-    "ctaJournal": "Abre tu diario",
-    "ctaHabits": "Revisa tus hábitos",
-    "signIn": "Iniciar sesión"
+    "howItWorks": {
+      "title": "Simple por diseño",
+      "step1Label": "Crea tu cuenta",
+      "step1Body": "Regístrate en segundos con correo o Google. Sin tarjeta de crédito, sin compromiso.",
+      "step2Label": "Construye tu práctica diaria",
+      "step2Body": "Haz check-in cada día, escribe en tu diario y registra los hábitos que importan.",
+      "step3Label": "Mira tu crecimiento",
+      "step3Body": "Revisa tus patrones, reformula pensamientos negativos y celebra pequeñas victorias."
+    },
+    "therapist": {
+      "title": "Para profesionales de salud mental",
+      "body": "Usa Phantom Prophet junto a tus pacientes. Monitorea su estado de ánimo, hábitos y entradas de diario entre sesiones — con su permiso.",
+      "emailCta": "Escríbenos →",
+      "email": "edude.espinosa@gmail.com"
+    },
+    "finalCta": {
+      "headline": "Listo cuando tú lo estés.",
+      "body": "Tu camino comienza con un pequeño paso.",
+      "button": "Crea tu cuenta gratis"
+    }
   },
   "login": {
     "title": "Phantom Prophet",
