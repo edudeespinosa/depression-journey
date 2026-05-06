@@ -78,7 +78,7 @@
       "title": "For mental health professionals",
       "body": "Use Phantom Prophet alongside your patients. Monitor their mood, habits, and journal entries between sessions — with their permission.",
       "emailCta": "Send us an email →",
-      "email": "edude.espinosa@gmail.com"
+      "email": "phantom@phantomprophet.com"
     },
     "finalCta": {
       "headline": "Ready when you are.",
@@ -109,6 +109,18 @@
     "resetSuccessMessage": "Check your email for a reset link.",
     "verifyTitle": "Check your inbox",
     "verifySubtitle": "We sent a confirmation link to {email}. Click it to activate your account."
+  },
+  "resetPassword": {
+    "title": "Set a new password",
+    "subtitle": "Choose something you'll remember.",
+    "passwordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "submitButton": "Update password",
+    "loading": "Updating…",
+    "successTitle": "Password updated",
+    "successBody": "You're all set. Taking you to your dashboard.",
+    "passwordMismatch": "Passwords don't match.",
+    "errorMessage": "Something went wrong. Please request a new reset link."
   },
   "onboarding": {
     "step1Title": "Welcome to Phantom Prophet",

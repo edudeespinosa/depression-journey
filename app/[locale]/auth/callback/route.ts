@@ -13,9 +13,8 @@ export async function GET(request: NextRequest, { params }: Params) {
     const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
 
-    // Password recovery — send back to login (no reset page yet)
     if (type === "recovery") {
-      return NextResponse.redirect(`${origin}/${locale}/login`);
+      return NextResponse.redirect(`${origin}/${locale}/reset-password`);
     }
 
     const { data: { user } } = await supabase.auth.getUser();
