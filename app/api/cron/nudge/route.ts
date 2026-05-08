@@ -95,18 +95,18 @@ export async function POST(req: NextRequest) {
   );
 
   const nudged = results.filter((r) => r.status === "fulfilled").length;
-  const failed = results.filter((r) => r.status === "rejected").length;
+  const errors = results
+    .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+    .map((r) => r.reason?.message ?? String(r.reason));
 
-  if (failed > 0) {
-    const errors = results
-      .filter((r): r is PromiseRejectedResult => r.status === "rejected")
-      .map((r) => r.reason?.message ?? String(r.reason));
+  if (errors.length > 0) {
     console.error("[cron/nudge] some nudges failed:", errors);
   }
 
   return NextResponse.json({
     nudged,
-    failed,
+    failed: errors.length,
     skipped: prefs.length - inactivePrefs.length,
+    errors,
   });
 }
