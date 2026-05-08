@@ -88,4 +88,5 @@ export async function sendNudgeEmail({
   });
 
   if (error) throw new Error(`Resend error: ${error.message}`);
+
 }
