@@ -73,11 +73,18 @@ export async function sendNudgeEmail({
 </body>
 </html>`;
 
+  const plainText = `${message}\n\n${ctaLabel}: ${ctaUrl}\n\n---\nYou're receiving this because you have email check-in reminders enabled.\nManage preferences: ${appUrl}/en/settings`;
+
   const { error } = await getResend().emails.send({
     from: FROM,
     to,
-    subject: "A gentle nudge from Phantom Prophet 🌿",
+    subject: "A gentle nudge from Phantom Prophet",
     html,
+    text: plainText,
+    headers: {
+      "List-Unsubscribe": `<${appUrl}/en/settings>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
   });
 
   if (error) throw new Error(`Resend error: ${error.message}`);
