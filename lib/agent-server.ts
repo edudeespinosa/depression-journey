@@ -61,18 +61,25 @@ const TOOLS: Anthropic.Tool[] = [
   },
 ];
 
-const SYSTEM = `You are Phantom Prophet, a warm mental wellness companion.
+function buildSystem(todayISO: string): string {
+  return `You are Phantom Prophet, a warm mental wellness companion.
 You have tools to query a user's recent mood check-ins, journal moods, and habit data.
+Today's date is ${todayISO}.
 
 Your job: call the data tools, then call suggest exactly once with ONE meaningful observation.
 
+Recency rules — check these FIRST before choosing a type:
+- If days_since_last_checkin >= 2 (or no check-ins exist): ALWAYS use "nudge" to gently re-engage. Never celebrate old data as if it reflects the user's current state.
+- If days_since_last_checkin >= 2, do NOT reference old moods as "this week's" wins.
+- Use "celebration" only when the most recent check-in is from today or yesterday AND shows a genuinely positive trend.
+- Use "insight" only when the data is recent (within 2 days) and reveals a meaningful pattern.
+
+General rules:
 - Be specific — reference actual patterns you see
 - Keep message to 1-2 sentences, warm and non-clinical
-- type "insight": you noticed a meaningful pattern
-- type "nudge": something beneficial has been missed (no check-ins, habits behind)
-- type "celebration": streak, goal met, or mood improving
 - If no data exists yet, use "nudge" to welcome them and suggest a first check-in
 - Never be alarmist or clinical`;
+}
 
 export async function runAgent(
   userId: string,
@@ -80,6 +87,7 @@ export async function runAgent(
   supabase: any
 ): Promise<Suggestion> {
   const db = supabase;
+  const todayISO = new Date().toISOString().split("T")[0];
 
   async function executeTool(name: string): Promise<string> {
     if (name === "get_recent_checkins") {
@@ -91,14 +99,18 @@ export async function runAgent(
         .eq("user_id", userId)
         .gte("created_at", cutoff.toISOString())
         .order("created_at", { ascending: false });
-      if (!data || data.length === 0) return "No check-ins in the last 7 days.";
-      return JSON.stringify(
-        data.map((c: { emotion: string; intensity: number; created_at: string }) => ({
+      if (!data || data.length === 0) return "No check-ins in the last 7 days. days_since_last_checkin: 7+";
+      const mostRecent = new Date(data[0].created_at);
+      const today = new Date(todayISO);
+      const daysSince = Math.floor((today.getTime() - mostRecent.setHours(0, 0, 0, 0)) / 86_400_000);
+      return JSON.stringify({
+        days_since_last_checkin: daysSince,
+        checkins: data.map((c: { emotion: string; intensity: number; created_at: string }) => ({
           emotion: c.emotion,
           intensity: c.intensity,
-          date: new Date(c.created_at).toLocaleDateString(),
-        }))
-      );
+          date: new Date(c.created_at).toISOString().split("T")[0],
+        })),
+      });
     }
 
     if (name === "get_journal_moods") {
@@ -174,7 +186,7 @@ export async function runAgent(
       response = await client.messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 300,
-        system: SYSTEM,
+        system: buildSystem(todayISO),
         tools: TOOLS,
         messages,
       });

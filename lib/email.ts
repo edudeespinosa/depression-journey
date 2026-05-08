@@ -18,7 +18,7 @@ export async function sendNudgeEmail({
   actionLabel?: string;
   actionHref?: string;
 }) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://phantomprophet.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://phantomprophet.com";
   const ctaUrl = actionHref ? `${appUrl}/en${actionHref}` : `${appUrl}/en/dashboard`;
   const ctaLabel = actionLabel ?? "Open dashboard";
 
